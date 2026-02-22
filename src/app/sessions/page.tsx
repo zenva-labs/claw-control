@@ -1,0 +1,72 @@
+import type { Metadata } from "next";
+import { getAgents, getAllSessions } from "@/lib/openclaw";
+import { SessionsTable } from "@/components/sessions-table";
+import { Container } from "@/components/ui/container";
+import { PageBreadcrumb } from "@/components/page-breadcrumb";
+import { getPlural } from "@/lib/utils";
+
+export const metadata: Metadata = { title: "Sessions | Claw Control" };
+export const dynamic = "force-dynamic";
+
+export default function AllSessionsPage() {
+  const agents = getAgents();
+  const sessions = getAllSessions();
+  const activeCount = sessions.filter((s) => s.status === "active").length;
+
+  const rows = sessions.map((s) => ({
+    id: s.id,
+    agentId: s.agentId,
+    agentName: s.agentName,
+    status: s.status,
+    messageCount: s.messageCount,
+    totalCost: s.totalCost,
+    startedAt: s.startedAt,
+    lastUserMessage: s.lastUserMessage,
+  }));
+
+  return (
+    <Container fullWidth>
+      <PageBreadcrumb page="Sessions" />
+      <div className="flex items-end justify-between gap-1 mb-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            All Sessions
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            All active and archived sessions across all agents.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-1">
+            <span className="font-medium">{sessions.length}</span>
+            <span className="text-muted-foreground tabular-nums">
+              total {getPlural("session", "sessions", sessions.length)}
+            </span>
+          </div>
+          <span className="text-muted-foreground">&middot;</span>
+          <div className="flex items-center gap-1">
+            <span className="font-medium">{activeCount}</span>
+            <span className="text-muted-foreground tabular-nums">
+              {getPlural("active", "active", activeCount)} sessions
+            </span>
+          </div>
+          <span className="text-muted-foreground">&middot;</span>
+          <div className="flex items-center gap-1">
+            <span className="font-medium">{agents.length}</span>
+            <span className="text-muted-foreground tabular-nums">
+              {getPlural("agent", "agents", agents.length)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {sessions.length === 0 ? (
+        <p className="text-muted-foreground text-sm py-8 text-center">
+          No sessions found.
+        </p>
+      ) : (
+        <SessionsTable sessions={rows} />
+      )}
+    </Container>
+  );
+}
