@@ -15,9 +15,10 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
 
-type TimeRange = "week" | "7d" | "30d" | "all";
+type TimeRange = "today" | "week" | "7d" | "30d" | "all";
 
 const RANGE_LABELS: Record<TimeRange, string> = {
+  today: "Today",
   week: "This Week",
   "7d": "Last 7 Days",
   "30d": "Last 30 Days",
@@ -27,6 +28,11 @@ const RANGE_LABELS: Record<TimeRange, string> = {
 function getRangeCutoff(range: TimeRange): number {
   if (range === "all") return 0;
   const now = new Date();
+  if (range === "today") {
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    return start.getTime();
+  }
   if (range === "week") {
     const day = now.getDay();
     const monday = new Date(now);
@@ -43,6 +49,10 @@ function getRangeCutoff(range: TimeRange): number {
 
 function formatDateRange(range: TimeRange, records: UsageRecord[]): string {
   const now = new Date();
+
+  if (range === "today") {
+    return format(now, "MMM d, yyyy");
+  }
 
   if (range === "all") {
     if (records.length === 0) return "No data";
@@ -74,6 +84,11 @@ function dateKey(ts: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+function hourKey(ts: number): string {
+  const d = new Date(ts);
+  return `${String(d.getHours()).padStart(2, "0")}:00`;
+}
+
 function shortDate(key: string): string {
   const [, m, d] = key.split("-");
   return `${m}/${d}`;
@@ -92,7 +107,7 @@ const CHART_COLORS = [
 ];
 
 export function UsageDashboard({ records }: { records: UsageRecord[] }) {
-  const [range, setRange] = useState<TimeRange>("week");
+  const [range, setRange] = useState<TimeRange>("today");
 
   const filtered = useMemo(() => {
     const cutoff = getRangeCutoff(range);
@@ -183,43 +198,50 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
     };
   }, [filtered]);
 
-  // Chart data: daily cost stacked by model, with a full date grid for the range
+  // Chart data: hourly (today) or daily cost stacked by model
   const { chartData, chartModels } = useMemo(() => {
-    const dayModelMap = new Map<string, Map<string, number>>();
+    const bucketModelMap = new Map<string, Map<string, number>>();
     const allModels = new Set<string>();
 
+    const keyFn = range === "today" ? hourKey : dateKey;
+
     for (const r of filtered) {
-      const dk = dateKey(r.timestamp);
-      if (!dayModelMap.has(dk)) dayModelMap.set(dk, new Map());
-      const dayMap = dayModelMap.get(dk)!;
-      dayMap.set(r.model, (dayMap.get(r.model) || 0) + r.cost);
+      const bk = keyFn(r.timestamp);
+      if (!bucketModelMap.has(bk)) bucketModelMap.set(bk, new Map());
+      const bMap = bucketModelMap.get(bk)!;
+      bMap.set(r.model, (bMap.get(r.model) || 0) + r.cost);
       allModels.add(r.model);
     }
 
     const models = Array.from(allModels).sort();
 
-    // Build the full grid of days so the x-axis always shows the expected span
-    let days: string[];
-    if (range === "all") {
-      days = Array.from(dayModelMap.keys()).sort();
+    let slots: string[];
+    if (range === "today") {
+      const now = new Date();
+      slots = Array.from(
+        { length: now.getHours() + 1 },
+        (_, h) => `${String(h).padStart(2, "0")}:00`,
+      );
+    } else if (range === "all") {
+      slots = Array.from(bucketModelMap.keys()).sort();
     } else {
       const cutoff = getRangeCutoff(range);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const slots: string[] = [];
       const cursor = new Date(cutoff);
+      const acc: string[] = [];
       while (cursor <= today) {
-        slots.push(dateKey(cursor.getTime()));
+        acc.push(dateKey(cursor.getTime()));
         cursor.setDate(cursor.getDate() + 1);
       }
-      days = slots;
+      slots = acc;
     }
 
-    const data = days.map((day) => {
-      const entry: Record<string, string | number> = { date: shortDate(day) };
-      const dayMap = dayModelMap.get(day);
+    const data = slots.map((slot) => {
+      const entry: Record<string, string | number> = { date: slot };
+      const bMap = bucketModelMap.get(slot);
       for (const model of models) {
-        entry[model] = +(dayMap ? dayMap.get(model) || 0 : 0).toFixed(6);
+        entry[model] = +(bMap ? bMap.get(model) || 0 : 0).toFixed(6);
       }
       return entry;
     });
@@ -245,7 +267,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
           onValueChange={(v) => setRange(v as TimeRange)}
           className="flex-1 shrink-0"
         >
-          <TabsList className="max-w-[400px]">
+          <TabsList className="max-w-[460px]">
             {(Object.keys(RANGE_LABELS) as TimeRange[]).map((key) => (
               <TabsTrigger key={key} value={key}>
                 {RANGE_LABELS[key]}
