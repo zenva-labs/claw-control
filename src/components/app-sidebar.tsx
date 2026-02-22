@@ -31,10 +31,13 @@ const navItems = [
   { href: "/gateway", label: "Gateway", icon: RadioIcon },
   { href: "/usage", label: "Usage", icon: BarChart3Icon },
   { href: "/cron", label: "Cron Jobs", icon: ClockIcon },
-  { href: "/logs", label: "Logs", icon: ScrollTextIcon },
+  ,
 ];
 
-const bottomNavItems = [{ href: "/settings", label: "Settings", icon: SettingsIcon }];
+const bottomNavItems = [
+  { href: "/logs", label: "Logs", icon: ScrollTextIcon },
+  { href: "/settings", label: "Settings", icon: SettingsIcon },
+];
 
 export function AppSidebar() {
   const pathname = usePathname();
