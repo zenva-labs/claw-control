@@ -124,13 +124,13 @@ export function LogViewer({ paused, onPausedChange, onFilePathChange }: LogViewe
   const bufferRef = useRef<LogEntry[]>([]);
 
   const onPausedChangeRef = useRef(onPausedChange);
-  onPausedChangeRef.current = onPausedChange;
   const onFilePathChangeRef = useRef(onFilePathChange);
-  onFilePathChangeRef.current = onFilePathChange;
+  useEffect(() => {
+    onPausedChangeRef.current = onPausedChange;
+    onFilePathChangeRef.current = onFilePathChange;
+  });
 
   useEffect(() => {
-    setEntries([]);
-    setAutoScroll(true);
     onPausedChangeRef.current(false);
     bufferRef.current = [];
 
@@ -153,14 +153,9 @@ export function LogViewer({ paused, onPausedChange, onFilePathChange }: LogViewe
     return () => es.close();
   }, []);
 
-  const frozenRef = useRef<LogEntry[]>([]);
-  const prevPausedRef = useRef(paused);
-  if (paused && !prevPausedRef.current) {
-    frozenRef.current = entries;
-  }
-  prevPausedRef.current = paused;
+  const [frozenEntries, setFrozenEntries] = useState<LogEntry[]>([]);
 
-  const visibleEntries = paused ? frozenRef.current : entries;
+  const visibleEntries = paused ? frozenEntries : entries;
 
   useEffect(() => {
     if (autoScroll && !paused && bottomRef.current) {
@@ -182,7 +177,7 @@ export function LogViewer({ paused, onPausedChange, onFilePathChange }: LogViewe
 
   const clearEntries = useCallback(() => {
     bufferRef.current = [];
-    frozenRef.current = [];
+    setFrozenEntries([]);
     setEntries([]);
   }, []);
 
@@ -267,6 +262,8 @@ export function LogViewer({ paused, onPausedChange, onFilePathChange }: LogViewe
                   requestAnimationFrame(() =>
                     bottomRef.current?.scrollIntoView({ behavior: "instant" }),
                   );
+                } else {
+                  setFrozenEntries(entries);
                 }
                 onPausedChange(!paused);
               }}

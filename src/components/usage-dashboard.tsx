@@ -90,11 +90,6 @@ function hourKey(ts: number): string {
   return `${String(d.getHours()).padStart(2, "0")}:00`;
 }
 
-function shortDate(key: string): string {
-  const [, m, d] = key.split("-");
-  return `${m}/${d}`;
-}
-
 export function UsageDashboard({ records }: { records: UsageRecord[] }) {
   const [range, setRange] = useState<TimeRange>("today");
 
