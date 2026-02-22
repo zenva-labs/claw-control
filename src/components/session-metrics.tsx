@@ -27,16 +27,14 @@ function BarRow({
   const pct = max > 0 ? (value / max) * 100 : 0;
   return (
     <div className="flex items-start gap-3">
-      <span className="text-sm text-muted-foreground w-28 shrink-0">
-        {label}
-      </span>
-      <div className="flex-1 h-6 bg-muted/50 rounded-sm overflow-hidden">
+      <span className="text-muted-foreground w-28 shrink-0 text-sm">{label}</span>
+      <div className="bg-muted/50 h-6 flex-1 overflow-hidden rounded-sm">
         <div
           className={cn("h-full rounded-sm transition-all", className)}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-sm tabular-nums w-20 font-medium text-right">
+      <span className="w-20 text-right text-sm font-medium tabular-nums">
         {value.toLocaleString()}
       </span>
     </div>
@@ -101,41 +99,33 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
     };
   }, [messages]);
 
-  const tokenMax = Math.max(
-    stats.inputTokens,
-    stats.outputTokens,
-    stats.cachedTokens,
-  );
-  const msgMax = Math.max(
-    stats.userMessages,
-    stats.assistantMessages,
-    stats.systemMessages,
-  );
+  const tokenMax = Math.max(stats.inputTokens, stats.outputTokens, stats.cachedTokens);
+  const msgMax = Math.max(stats.userMessages, stats.assistantMessages, stats.systemMessages);
   const toolMax = stats.toolBreakdown[0]?.count ?? 0;
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Card>
           <CardContent>
-            <div className="text-sm text-muted-foreground">Total Tokens</div>
-            <div className="text-2xl font-bold tabular-nums mt-1">
+            <div className="text-muted-foreground text-sm">Total Tokens</div>
+            <div className="mt-1 text-2xl font-bold tabular-nums">
               {stats.totalTokens.toLocaleString()}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <div className="text-sm text-muted-foreground">Messages</div>
-            <div className="text-2xl font-bold tabular-nums mt-1">
+            <div className="text-muted-foreground text-sm">Messages</div>
+            <div className="mt-1 text-2xl font-bold tabular-nums">
               {stats.totalMessages.toLocaleString()}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <div className="text-sm text-muted-foreground">Tool Calls</div>
-            <div className="text-2xl font-bold tabular-nums mt-1">
+            <div className="text-muted-foreground text-sm">Tool Calls</div>
+            <div className="mt-1 text-2xl font-bold tabular-nums">
               {stats.toolCalls.toLocaleString()}
             </div>
           </CardContent>
@@ -143,8 +133,8 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
         {stats.totalCost > 0 && (
           <Card>
             <CardContent>
-              <div className="text-sm text-muted-foreground">Total Cost</div>
-              <div className="text-2xl font-bold tabular-nums mt-1">
+              <div className="text-muted-foreground text-sm">Total Cost</div>
+              <div className="mt-1 text-2xl font-bold tabular-nums">
                 ${stats.totalCost.toFixed(4)}
               </div>
             </CardContent>
@@ -152,7 +142,7 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Token Breakdown</CardTitle>
@@ -217,26 +207,24 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
                 <TableRow>
                   <TableHead>Tool</TableHead>
                   <TableHead className="w-48">Distribution</TableHead>
-                  <TableHead className="text-right w-20">Calls</TableHead>
+                  <TableHead className="w-20 text-right">Calls</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {stats.toolBreakdown.map((tool) => (
                   <TableRow key={tool.name}>
-                    <TableCell className="font-mono text-sm">
-                      {tool.name}
-                    </TableCell>
+                    <TableCell className="font-mono text-sm">{tool.name}</TableCell>
                     <TableCell>
-                      <div className="h-4 bg-muted/50 rounded-sm overflow-hidden">
+                      <div className="bg-muted/50 h-4 overflow-hidden rounded-sm">
                         <div
-                          className="h-full bg-foreground/20 rounded-sm"
+                          className="bg-foreground/20 h-full rounded-sm"
                           style={{
                             width: `${toolMax > 0 ? (tool.count / toolMax) * 100 : 0}%`,
                           }}
                         />
                       </div>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums font-medium">
+                    <TableCell className="text-right font-medium tabular-nums">
                       {tool.count.toLocaleString()}
                     </TableCell>
                   </TableRow>

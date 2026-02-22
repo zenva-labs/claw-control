@@ -16,25 +16,19 @@ function Tabs({
       data-slot="tabs"
       data-orientation={orientation}
       orientation={orientation}
-      className={cn(
-        "group/tabs flex gap-2 data-[orientation=horizontal]:flex-col",
-        className,
-      )}
+      className={cn("group/tabs flex gap-2 data-[orientation=horizontal]:flex-col", className)}
       {...props}
     />
   );
 }
 
-function TabsList({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
         "group/tabs-list inline-flex w-full items-center justify-center",
-        "rounded-lg bg-muted p-1 text-muted-foreground",
+        "bg-muted text-muted-foreground rounded-lg p-1",
         "group-data-[orientation=horizontal]/tabs:h-10",
         "group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col",
         className,
@@ -71,7 +65,7 @@ function TabsTrigger({
     >
       {children}
       {count !== undefined && (
-        <Badge variant="secondary" className="text-xs tabular-nums px-1.5">
+        <Badge variant="secondary" className="px-1.5 text-xs tabular-nums">
           {count}
         </Badge>
       )}
@@ -79,10 +73,7 @@ function TabsTrigger({
   );
 }
 
-function TabsContent({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"

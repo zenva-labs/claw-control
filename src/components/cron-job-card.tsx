@@ -9,7 +9,7 @@ import type { AgentConfig, CronJob } from "@/lib/types";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[160px_1fr] gap-2 py-1.5 border-b last:border-0 text-sm">
+    <div className="grid grid-cols-[160px_1fr] gap-2 border-b py-1.5 text-sm last:border-0">
       <span className="text-muted-foreground shrink-0">{label}</span>
       <span className="font-mono text-xs break-all">{value}</span>
     </div>
@@ -37,22 +37,16 @@ function formatSchedule(job: CronJob): React.ReactNode {
   return schedule.kind;
 }
 
-export function CronJobCard({
-  job,
-  agent,
-}: {
-  job: CronJob;
-  agent?: AgentConfig;
-}) {
+export function CronJobCard({ job, agent }: { job: CronJob; agent?: AgentConfig }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="rounded-lg border bg-card overflow-hidden">
+    <div className="bg-card overflow-hidden rounded-lg border">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-4 px-4 py-3.5 text-left hover:bg-muted/50 transition-colors cursor-pointer"
+        className="hover:bg-muted/50 flex w-full cursor-pointer items-center justify-between gap-4 px-4 py-3.5 text-left transition-colors"
       >
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
           {job.enabled ? (
             <Badge variant="success">Enabled</Badge>
           ) : (
@@ -60,9 +54,9 @@ export function CronJobCard({
               Disabled
             </Badge>
           )}
-          <span className="font-medium text-sm truncate">{job.name}</span>
+          <span className="truncate text-sm font-medium">{job.name}</span>
         </div>
-        <div className="flex items-center gap-3 shrink-0 text-xs">
+        <div className="flex shrink-0 items-center gap-3 text-xs">
           {agent ? (
             <Link
               href={`/agents/${agent.id}`}
@@ -72,29 +66,23 @@ export function CronJobCard({
               {agent.name}
             </Link>
           ) : (
-            <span className="text-muted-foreground font-mono">
-              {job.sessionTarget}
-            </span>
+            <span className="text-muted-foreground font-mono">{job.sessionTarget}</span>
           )}
-          <span className="hidden sm:block text-muted-foreground">
-            {formatSchedule(job)}
-          </span>
+          <span className="text-muted-foreground hidden sm:block">{formatSchedule(job)}</span>
           <ChevronDownIcon
-            className={`size-4 transition-transform duration-200 text-muted-foreground ${open ? "rotate-180" : ""}`}
+            className={`text-muted-foreground size-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           />
         </div>
       </button>
 
       {open && (
-        <div className="px-4 pb-4 border-t pt-3">
+        <div className="border-t px-4 pt-3 pb-4">
           <Row label="ID" value={job.id} />
           <Row
             label="Schedule"
             value={
               <span>
-                <span className="text-muted-foreground mr-1">
-                  {job.schedule.kind}
-                </span>
+                <span className="text-muted-foreground mr-1">{job.schedule.kind}</span>
                 {job.schedule.at && format(new Date(job.schedule.at), "MMM d, yyyy, h:mm a")}
                 {job.schedule.cron && job.schedule.cron}
               </span>
@@ -104,14 +92,9 @@ export function CronJobCard({
             label="Agent"
             value={
               agent ? (
-                <Link
-                  href={`/agents/${agent.id}`}
-                  className="hover:underline text-foreground"
-                >
+                <Link href={`/agents/${agent.id}`} className="text-foreground hover:underline">
                   {agent.name}
-                  <span className="text-muted-foreground ml-1">
-                    ({agent.id})
-                  </span>
+                  <span className="text-muted-foreground ml-1">({agent.id})</span>
                 </Link>
               ) : (
                 job.sessionTarget
@@ -120,23 +103,15 @@ export function CronJobCard({
           />
           <Row label="Wake Mode" value={job.wakeMode ?? "—"} />
           <Row label="Payload Kind" value={job.payload.kind} />
-          {job.payload.text && (
-            <Row label="Payload Text" value={job.payload.text} />
-          )}
+          {job.payload.text && <Row label="Payload Text" value={job.payload.text} />}
           <Row label="Next Run" value={formatMs(job.state?.nextRunAtMs)} />
           {job.state?.lastRunAtMs != null && (
             <Row label="Last Run" value={formatMs(job.state.lastRunAtMs)} />
           )}
           {job.state?.lastRunStatus != null && (
-            <Row
-              label="Last Run Status"
-              value={String(job.state.lastRunStatus)}
-            />
+            <Row label="Last Run Status" value={String(job.state.lastRunStatus)} />
           )}
-          <Row
-            label="Delete After Run"
-            value={job.deleteAfterRun ? "Yes" : "No"}
-          />
+          <Row label="Delete After Run" value={job.deleteAfterRun ? "Yes" : "No"} />
           <Row label="Created" value={formatMs(job.createdAtMs)} />
           <Row label="Updated" value={formatMs(job.updatedAtMs)} />
         </div>

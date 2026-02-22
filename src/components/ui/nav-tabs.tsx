@@ -16,19 +16,13 @@ function NavTabs({
       data-slot="nav-tabs"
       data-orientation={orientation}
       orientation={orientation}
-      className={cn(
-        "group/nav-tabs flex gap-2 data-[orientation=horizontal]:flex-col",
-        className,
-      )}
+      className={cn("group/nav-tabs flex gap-2 data-[orientation=horizontal]:flex-col", className)}
       {...props}
     />
   );
 }
 
-function NavTabsList({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+function NavTabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
       data-slot="nav-tabs-list"
@@ -66,7 +60,7 @@ function NavTabsTrigger({
         "dark:data-[state=active]:border-transparent dark:data-[state=active]:bg-transparent",
         "group-data-[orientation=vertical]/nav-tabs:w-full group-data-[orientation=vertical]/nav-tabs:justify-start",
         // underline indicator
-        "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity",
+        "after:bg-foreground after:absolute after:opacity-0 after:transition-opacity",
         "group-data-[orientation=horizontal]/nav-tabs:after:inset-x-0 group-data-[orientation=horizontal]/nav-tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/nav-tabs:after:h-0.5",
         "group-data-[orientation=vertical]/nav-tabs:after:inset-y-0 group-data-[orientation=vertical]/nav-tabs:after:-right-1 group-data-[orientation=vertical]/nav-tabs:after:w-0.5",
         "data-[state=active]:after:opacity-100",

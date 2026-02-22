@@ -16,9 +16,7 @@ export default function UsagePage() {
       <div className="space-y-3">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">Usage</h1>
-          <p className="text-sm text-muted-foreground">
-            OpenClaw usage metrics for all agents.
-          </p>
+          <p className="text-muted-foreground text-sm">OpenClaw usage metrics for all agents.</p>
         </div>
         <UsageDashboard records={records} />
       </div>

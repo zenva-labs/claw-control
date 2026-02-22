@@ -2,12 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  NavTabs,
-  NavTabsList,
-  NavTabsTrigger,
-  NavTabsContent,
-} from "@/components/ui/nav-tabs";
+import { NavTabs, NavTabsList, NavTabsTrigger, NavTabsContent } from "@/components/ui/nav-tabs";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -69,13 +64,7 @@ function formatUptime(startedAt: string | null): string {
   return parts.join(" ");
 }
 
-function DetailRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
+function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between py-2.5 text-sm">
       <span className="text-muted-foreground">{label}</span>
@@ -93,38 +82,23 @@ function HealthBadge({ status }: { status: HealthStatus }) {
     );
   }
   return (
-    <Badge
-      variant={status === "online" ? "success" : "danger"}
-      className="text-xs"
-      showDot
-    >
+    <Badge variant={status === "online" ? "success" : "danger"} className="text-xs" showDot>
       {status === "online" ? "Online" : "Offline"}
     </Badge>
   );
 }
 
-function OverviewTab({
-  info,
-  health,
-}: {
-  info: GatewayInfo;
-  health: HealthStatus;
-}) {
+function OverviewTab({ info, health }: { info: GatewayInfo; health: HealthStatus }) {
   return (
     <Container className="space-y-3">
       <Card>
         <CardContent className="space-y-0 divide-y">
-          <DetailRow
-            label="Health Status"
-            value={<HealthBadge status={health} />}
-          />
+          <DetailRow label="Health Status" value={<HealthBadge status={health} />} />
           <DetailRow
             label="Uptime"
             value={
               health === "online" ? (
-                <span className="tabular-nums">
-                  {formatUptime(info.startedAt)}
-                </span>
+                <span className="tabular-nums">{formatUptime(info.startedAt)}</span>
               ) : (
                 <span className="text-muted-foreground">—</span>
               )
@@ -136,20 +110,12 @@ function OverviewTab({
           />
           <DetailRow
             label="Port"
-            value={
-              <span className="font-mono text-xs tabular-nums">
-                {info.port}
-              </span>
-            }
+            value={<span className="font-mono text-xs tabular-nums">{info.port}</span>}
           />
           {info.pid && (
             <DetailRow
               label="PID"
-              value={
-                <span className="font-mono text-xs tabular-nums">
-                  {info.pid}
-                </span>
-              }
+              value={<span className="font-mono text-xs tabular-nums">{info.pid}</span>}
             />
           )}
         </CardContent>
@@ -157,10 +123,7 @@ function OverviewTab({
 
       <Card>
         <CardContent className="space-y-0 divide-y">
-          <DetailRow
-            label="Gateway Token"
-            value={<SecretField value={info.auth.token} />}
-          />
+          <DetailRow label="Gateway Token" value={<SecretField value={info.auth.token} />} />
           <DetailRow
             label="Auth Mode"
             value={
@@ -209,9 +172,7 @@ function OverviewTab({
                   {info.cronJobCount} active
                 </Badge>
               ) : (
-                <span className="text-muted-foreground text-xs">
-                  None configured
-                </span>
+                <span className="text-muted-foreground text-xs">None configured</span>
               )
             }
           />
@@ -220,8 +181,7 @@ function OverviewTab({
               label="Health Monitor"
               value={
                 <span className="text-xs tabular-nums">
-                  interval {info.healthMonitor.interval}s · grace{" "}
-                  {info.healthMonitor.grace}s
+                  interval {info.healthMonitor.interval}s · grace {info.healthMonitor.grace}s
                 </span>
               }
             />
@@ -246,16 +206,10 @@ function OverviewTab({
       {info.deniedCommands.length > 0 && (
         <Card>
           <CardContent>
-            <p className="text-sm font-medium mb-2.5 text-muted-foreground">
-              Denied Node Commands
-            </p>
+            <p className="text-muted-foreground mb-2.5 text-sm font-medium">Denied Node Commands</p>
             <div className="flex flex-wrap gap-1.5">
               {info.deniedCommands.map((cmd) => (
-                <Badge
-                  key={cmd}
-                  variant="outline"
-                  className="font-mono text-[11px]"
-                >
+                <Badge key={cmd} variant="outline" className="font-mono text-[11px]">
                   {cmd}
                 </Badge>
               ))}
@@ -272,12 +226,12 @@ function InstancesTab({ devices }: { devices: PairedDevice[] }) {
     return (
       <Container>
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
-          <div className="rounded-full bg-muted p-3">
-            <MonitorIcon className="size-6 text-muted-foreground" />
+          <div className="bg-muted rounded-full p-3">
+            <MonitorIcon className="text-muted-foreground size-6" />
           </div>
           <div>
-            <p className="font-medium text-sm">No paired devices</p>
-            <p className="text-muted-foreground text-sm mt-0.5">
+            <p className="text-sm font-medium">No paired devices</p>
+            <p className="text-muted-foreground mt-0.5 text-sm">
               No devices have connected to this gateway yet.
             </p>
           </div>
@@ -293,25 +247,20 @@ function InstancesTab({ devices }: { devices: PairedDevice[] }) {
           <Card key={device.deviceId}>
             <CardContent>
               <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1 min-w-0">
+                <div className="min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
-                    <MonitorIcon className="size-4 text-muted-foreground shrink-0" />
-                    <p className="font-mono text-sm font-medium truncate">
-                      {device.clientId}
-                    </p>
+                    <MonitorIcon className="text-muted-foreground size-4 shrink-0" />
+                    <p className="truncate font-mono text-sm font-medium">{device.clientId}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground ml-6">
+                  <div className="text-muted-foreground ml-6 flex items-center gap-2 text-xs">
                     <span>{device.platform}</span>
                     <span>·</span>
                     <span>{device.clientMode}</span>
                     <span>·</span>
-                    <span>
-                      Paired{" "}
-                      {format(device.approvedAtMs, "MMM d, yyyy, h:mm a")}
-                    </span>
+                    <span>Paired {format(device.approvedAtMs, "MMM d, yyyy, h:mm a")}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex shrink-0 items-center gap-1.5">
                   <Badge variant="outline" className="text-[11px] capitalize">
                     {device.role}
                   </Badge>
@@ -319,17 +268,13 @@ function InstancesTab({ devices }: { devices: PairedDevice[] }) {
               </div>
               <div className="mt-2.5 ml-6 flex flex-wrap gap-1">
                 {device.scopes.map((scope) => (
-                  <Badge
-                    key={scope}
-                    variant="secondary"
-                    className="text-[11px] font-mono"
-                  >
+                  <Badge key={scope} variant="secondary" className="font-mono text-[11px]">
                     {scope}
                   </Badge>
                 ))}
               </div>
               <div className="mt-2 ml-6">
-                <p className="text-[11px] text-muted-foreground font-mono truncate">
+                <p className="text-muted-foreground truncate font-mono text-[11px]">
                   Device ID: {device.deviceId}
                 </p>
               </div>
@@ -348,12 +293,12 @@ function SessionsTab({ sessions }: { sessions: ActiveSession[] }) {
     return (
       <Container>
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
-          <div className="rounded-full bg-muted p-3">
-            <MessageSquareMoreIcon className="size-6 text-muted-foreground" />
+          <div className="bg-muted rounded-full p-3">
+            <MessageSquareMoreIcon className="text-muted-foreground size-6" />
           </div>
           <div>
-            <p className="font-medium text-sm">No active sessions</p>
-            <p className="text-muted-foreground text-sm mt-0.5">
+            <p className="text-sm font-medium">No active sessions</p>
+            <p className="text-muted-foreground mt-0.5 text-sm">
               There are no active sessions across any agents right now.
             </p>
           </div>
@@ -374,30 +319,24 @@ function SessionsTab({ sessions }: { sessions: ActiveSession[] }) {
             <Card className="hover:bg-accent/50 transition-colors">
               <CardContent>
                 <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1 min-w-0">
+                  <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2">
-                      <ShieldIcon className="size-4 text-muted-foreground shrink-0" />
-                      <p className="font-mono text-xs font-medium truncate">
-                        {session.id}
-                      </p>
+                      <ShieldIcon className="text-muted-foreground size-4 shrink-0" />
+                      <p className="truncate font-mono text-xs font-medium">{session.id}</p>
                     </div>
                     {session.lastUserMessage && (
-                      <p className="text-sm text-muted-foreground ml-6 line-clamp-1">
+                      <p className="text-muted-foreground ml-6 line-clamp-1 text-sm">
                         {session.lastUserMessage}
                       </p>
                     )}
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground ml-6">
+                    <div className="text-muted-foreground ml-6 flex items-center gap-2 text-xs">
                       <span>{session.agentName}</span>
                       <span>·</span>
-                      <span className="tabular-nums">
-                        {session.messageCount} messages
-                      </span>
+                      <span className="tabular-nums">{session.messageCount} messages</span>
                       {session.totalCost > 0 && (
                         <>
                           <span>·</span>
-                          <span className="tabular-nums">
-                            ${session.totalCost.toFixed(4)}
-                          </span>
+                          <span className="tabular-nums">${session.totalCost.toFixed(4)}</span>
                         </>
                       )}
                       <span>·</span>
@@ -408,7 +347,7 @@ function SessionsTab({ sessions }: { sessions: ActiveSession[] }) {
                       </span>
                     </div>
                   </div>
-                  <Badge variant="success" className="text-[11px] shrink-0">
+                  <Badge variant="success" className="shrink-0 text-[11px]">
                     Active
                   </Badge>
                 </div>
@@ -442,15 +381,14 @@ export function GatewayPageTabs({
 
   return (
     <NavTabs value={activeTab} onValueChange={handleTabChange}>
-      <div className="border-b mb-3">
+      <div className="mb-3 border-b">
         <Container>
-          <div className="flex items-center gap-3 mb-2 justify-between">
+          <div className="mb-2 flex items-center justify-between gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">Gateway</h1>
             <div className="flex items-center gap-3">
               {lastCheckedAt && (
-                <span className="text-xs text-muted-foreground">
-                  Updated{" "}
-                  {formatDistanceToNow(lastCheckedAt, { addSuffix: true })}
+                <span className="text-muted-foreground text-xs">
+                  Updated {formatDistanceToNow(lastCheckedAt, { addSuffix: true })}
                 </span>
               )}
             </div>

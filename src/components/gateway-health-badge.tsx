@@ -25,8 +25,7 @@ export function GatewayHealthBadge() {
       try {
         const res = await fetch("/api/gateway/health", { cache: "no-store" });
         const data = await res.json();
-        if (!cancelled)
-          setStatus(data.status === "online" ? "online" : "offline");
+        if (!cancelled) setStatus(data.status === "online" ? "online" : "offline");
       } catch {
         if (!cancelled) setStatus("offline");
       }
@@ -42,12 +41,7 @@ export function GatewayHealthBadge() {
 
   return (
     <Badge variant={getBadgeVariant(status)} showDot>
-      Gateway{" "}
-      {status === "online"
-        ? "Online"
-        : status === "offline"
-          ? "Offline"
-          : "Loading"}
+      Gateway {status === "online" ? "Online" : status === "offline" ? "Offline" : "Loading"}
     </Badge>
   );
 }

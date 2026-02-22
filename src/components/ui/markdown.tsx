@@ -3,13 +3,7 @@ import remarkGfm from "remark-gfm";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-export function Markdown({
-  children,
-  className,
-}: {
-  children: string;
-  className?: string;
-}) {
+export function Markdown({ children, className }: { children: string; className?: string }) {
   return (
     <Card className={className}>
       <CardContent

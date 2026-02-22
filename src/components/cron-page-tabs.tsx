@@ -31,23 +31,21 @@ export function CronPageTabs({
 
   return (
     <Container>
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight mb-1">
-            Cron Jobs
-          </h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="mb-1 text-2xl font-semibold tracking-tight">Cron Jobs</h1>
+          <p className="text-muted-foreground text-sm">
             All scheduled cron jobs and their run history.
           </p>
         </div>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-muted-foreground text-xs">
           Updated {formatDistanceToNow(new Date(lastUpdatedAt), { addSuffix: true })}
         </span>
       </div>
 
       <Tabs defaultValue="scheduled">
         <div className="flex items-center justify-between gap-4">
-          <TabsList className="max-w-[220px] mb-1">
+          <TabsList className="mb-1 max-w-[220px]">
             <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
             <TabsTrigger value="runs">Runs</TabsTrigger>
           </TabsList>
@@ -71,12 +69,12 @@ export function CronPageTabs({
         <TabsContent value="scheduled">
           {jobs.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
-              <div className="rounded-full bg-muted p-3">
-                <ClockIcon className="size-6 text-muted-foreground" />
+              <div className="bg-muted rounded-full p-3">
+                <ClockIcon className="text-muted-foreground size-6" />
               </div>
               <div>
-                <p className="font-medium text-sm">No cron jobs</p>
-                <p className="text-muted-foreground text-sm mt-0.5">
+                <p className="text-sm font-medium">No cron jobs</p>
+                <p className="text-muted-foreground mt-0.5 text-sm">
                   Scheduled jobs will appear here once created.
                 </p>
               </div>
@@ -84,11 +82,7 @@ export function CronPageTabs({
           ) : (
             <div className="flex flex-col gap-2">
               {jobs.map((job) => (
-                <CronJobCard
-                  key={job.id}
-                  job={job}
-                  agent={agentById[job.sessionTarget]}
-                />
+                <CronJobCard key={job.id} job={job} agent={agentById[job.sessionTarget]} />
               ))}
             </div>
           )}
@@ -97,12 +91,12 @@ export function CronPageTabs({
         <TabsContent value="runs">
           {runs.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
-              <div className="rounded-full bg-muted p-3">
-                <PlayIcon className="size-6 text-muted-foreground" />
+              <div className="bg-muted rounded-full p-3">
+                <PlayIcon className="text-muted-foreground size-6" />
               </div>
               <div>
-                <p className="font-medium text-sm">No runs</p>
-                <p className="text-muted-foreground text-sm mt-0.5">
+                <p className="text-sm font-medium">No runs</p>
+                <p className="text-muted-foreground mt-0.5 text-sm">
                   Cron run history will appear here after jobs execute.
                 </p>
               </div>
@@ -124,15 +118,9 @@ export function CronPageTabs({
   );
 }
 
-function RunDetailRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
+function RunDetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[160px_1fr] gap-2 py-1.5 border-b last:border-0 text-sm">
+    <div className="grid grid-cols-[160px_1fr] gap-2 border-b py-1.5 text-sm last:border-0">
       <span className="text-muted-foreground shrink-0">{label}</span>
       <span className="font-mono text-xs break-all">{value}</span>
     </div>
@@ -143,63 +131,49 @@ function CronRunCard({ run, jobName }: { run: CronRun; jobName?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="rounded-lg border bg-card overflow-hidden">
+    <div className="bg-card overflow-hidden rounded-lg border">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-4 px-4 py-3.5 text-left hover:bg-muted/50 transition-colors cursor-pointer"
+        className="hover:bg-muted/50 flex w-full cursor-pointer items-center justify-between gap-4 px-4 py-3.5 text-left transition-colors"
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <Badge
-            variant={run.status === "ok" ? "success" : "destructive"}
-            className="shrink-0"
-          >
+        <div className="flex min-w-0 items-center gap-3">
+          <Badge variant={run.status === "ok" ? "success" : "destructive"} className="shrink-0">
             {run.status}
           </Badge>
           <div className="flex flex-col">
-            <span className="font-medium text-sm truncate">
+            <span className="truncate text-sm font-medium">
               <p>{run.summary}</p>
-              <p className="text-muted-foreground text-xs">
-                {jobName ?? run.jobId}
-              </p>
+              <p className="text-muted-foreground text-xs">{jobName ?? run.jobId}</p>
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0 text-xs">
+        <div className="flex shrink-0 items-center gap-3 text-xs">
           <span className="text-muted-foreground tabular-nums">
             {(run.durationMs / 1000).toFixed(1)}s
           </span>
-          <span className="hidden sm:block text-muted-foreground">
+          <span className="text-muted-foreground hidden sm:block">
             {format(run.runAtMs, "MMM d, yyyy, h:mm a")}
           </span>
           <ChevronDownIcon
-            className={`size-4 transition-transform duration-200 text-muted-foreground ${open ? "rotate-180" : ""}`}
+            className={`text-muted-foreground size-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           />
         </div>
       </button>
 
       {open && (
-        <div className="px-4 pb-4 border-t pt-3">
+        <div className="border-t px-4 pt-3 pb-4">
           <RunDetailRow label="Job ID" value={run.jobId} />
           {jobName && <RunDetailRow label="Job Name" value={jobName} />}
           <RunDetailRow label="Status" value={run.status} />
           {run.summary && <RunDetailRow label="Summary" value={run.summary} />}
-          <RunDetailRow
-            label="Run At"
-            value={format(run.runAtMs, "MMM d, yyyy, h:mm a")}
-          />
+          <RunDetailRow label="Run At" value={format(run.runAtMs, "MMM d, yyyy, h:mm a")} />
           <RunDetailRow
             label="Finished At"
             value={format(run.finishedAtMs, "MMM d, yyyy, h:mm a")}
           />
-          <RunDetailRow
-            label="Duration"
-            value={`${(run.durationMs / 1000).toFixed(2)}s`}
-          />
+          <RunDetailRow label="Duration" value={`${(run.durationMs / 1000).toFixed(2)}s`} />
           {run.nextRunAtMs != null && (
-            <RunDetailRow
-              label="Next Run"
-              value={format(run.nextRunAtMs, "MMM d, yyyy, h:mm a")}
-            />
+            <RunDetailRow label="Next Run" value={format(run.nextRunAtMs, "MMM d, yyyy, h:mm a")} />
           )}
         </div>
       )}

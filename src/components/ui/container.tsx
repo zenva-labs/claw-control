@@ -6,11 +6,7 @@ type ContainerProps = {
   className?: string;
 };
 
-export function Container({
-  children,
-  fullWidth = false,
-  className,
-}: ContainerProps) {
+export function Container({ children, fullWidth = false, className }: ContainerProps) {
   return (
     <div
       className={cn(

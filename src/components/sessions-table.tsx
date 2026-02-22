@@ -40,13 +40,8 @@ function formatDate(iso: string | undefined): string {
 }
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
-  if (!active)
-    return <ArrowUpDown className="size-3 text-muted-foreground/50" />;
-  return dir === "asc" ? (
-    <ArrowUp className="size-3" />
-  ) : (
-    <ArrowDown className="size-3" />
-  );
+  if (!active) return <ArrowUpDown className="text-muted-foreground/50 size-3" />;
+  return dir === "asc" ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />;
 }
 
 export function SessionsTable({
@@ -105,7 +100,7 @@ export function SessionsTable({
   const headerButton = (key: SortKey, label: string, className?: string) => (
     <button
       onClick={() => toggleSort(key)}
-      className={`flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer ${className ?? ""}`}
+      className={`hover:text-foreground flex cursor-pointer items-center gap-1 transition-colors ${className ?? ""}`}
     >
       {label}
       <SortIcon active={sortKey === key} dir={sortDir} />
@@ -119,20 +114,12 @@ export function SessionsTable({
           <TableRow>
             <TableHead className="w-[160px]">Session</TableHead>
             {showAgent && (
-              <TableHead className="w-[140px]">
-                {headerButton("agent", "Agent")}
-              </TableHead>
+              <TableHead className="w-[140px]">{headerButton("agent", "Agent")}</TableHead>
             )}
-            <TableHead className="w-[80px]">
-              {headerButton("status", "Status")}
-            </TableHead>
+            <TableHead className="w-[80px]">{headerButton("status", "Status")}</TableHead>
             <TableHead className="w-[90px] text-right">Messages</TableHead>
-            <TableHead className="w-[100px]">
-              {headerButton("cost", "Cost", "ml-auto")}
-            </TableHead>
-            <TableHead className="w-[180px]">
-              {headerButton("started", "Started")}
-            </TableHead>
+            <TableHead className="w-[100px]">{headerButton("cost", "Cost", "ml-auto")}</TableHead>
+            <TableHead className="w-[180px]">{headerButton("started", "Started")}</TableHead>
             <TableHead>Preview</TableHead>
           </TableRow>
         </TableHeader>
@@ -144,15 +131,13 @@ export function SessionsTable({
               onClick={() => navigateToSession(session.agentId, session.id)}
             >
               <TableCell>
-                <span className="font-mono text-xs">
-                  {session.id.slice(0, 8)}...
-                </span>
+                <span className="font-mono text-xs">{session.id.slice(0, 8)}...</span>
               </TableCell>
               {showAgent && (
                 <TableCell>
                   <Link
                     href={`/agents/${session.agentId}`}
-                    className="text-xs hover:underline text-muted-foreground relative z-10"
+                    className="text-muted-foreground relative z-10 text-xs hover:underline"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {session.agentName}
@@ -160,25 +145,20 @@ export function SessionsTable({
                 </TableCell>
               )}
               <TableCell>
-                <Badge
-                  variant={statusVariant(session.status)}
-                  className="text-[10px]"
-                >
+                <Badge variant={statusVariant(session.status)} className="text-[10px]">
                   {getStatusLabel(session.status)}
                 </Badge>
               </TableCell>
-              <TableCell className="text-right tabular-nums text-sm">
+              <TableCell className="text-right text-sm tabular-nums">
                 {session.messageCount}
               </TableCell>
-              <TableCell className="text-right tabular-nums text-sm text-muted-foreground">
-                {session.totalCost > 0
-                  ? `$${session.totalCost.toFixed(4)}`
-                  : "—"}
+              <TableCell className="text-muted-foreground text-right text-sm tabular-nums">
+                {session.totalCost > 0 ? `$${session.totalCost.toFixed(4)}` : "—"}
               </TableCell>
-              <TableCell className="text-xs text-muted-foreground">
+              <TableCell className="text-muted-foreground text-xs">
                 {formatDate(session.startedAt)}
               </TableCell>
-              <TableCell className="text-xs text-muted-foreground truncate max-w-[300px]">
+              <TableCell className="text-muted-foreground max-w-[300px] truncate text-xs">
                 {session.lastUserMessage || "—"}
               </TableCell>
             </TableRow>

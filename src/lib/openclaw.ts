@@ -16,8 +16,7 @@ import type {
   ResolvedTool,
 } from "./types";
 
-const OPENCLAW_DIR =
-  process.env.OPENCLAW_DIR || path.join(os.homedir(), ".openclaw");
+const OPENCLAW_DIR = process.env.OPENCLAW_DIR || path.join(os.homedir(), ".openclaw");
 
 export function getAgents(): AgentConfig[] {
   const configPath = path.join(OPENCLAW_DIR, "openclaw.json");
@@ -36,13 +35,7 @@ export function getAgents(): AgentConfig[] {
 
 export function getSkillsForAgent(agentId: string): ResolvedSkill[] {
   try {
-    const sessionsPath = path.join(
-      OPENCLAW_DIR,
-      "agents",
-      agentId,
-      "sessions",
-      "sessions.json",
-    );
+    const sessionsPath = path.join(OPENCLAW_DIR, "agents", agentId, "sessions", "sessions.json");
     if (!fs.existsSync(sessionsPath)) return [];
     const data = JSON.parse(fs.readFileSync(sessionsPath, "utf-8"));
 
@@ -53,23 +46,18 @@ export function getSkillsForAgent(agentId: string): ResolvedSkill[] {
 
     let latest: SkillsEntry | null = null;
     for (const entry of Object.values(data) as SkillsEntry[]) {
-      if (
-        entry.updatedAt &&
-        (!latest || !latest.updatedAt || entry.updatedAt > latest.updatedAt)
-      ) {
+      if (entry.updatedAt && (!latest || !latest.updatedAt || entry.updatedAt > latest.updatedAt)) {
         latest = entry;
       }
     }
 
-    return (latest?.skillsSnapshot?.resolvedSkills ?? []).map(
-      (s: ResolvedSkill) => ({
-        name: s.name,
-        description: s.description,
-        source: s.source,
-        filePath: s.filePath,
-        disableModelInvocation: s.disableModelInvocation ?? false,
-      }),
-    );
+    return (latest?.skillsSnapshot?.resolvedSkills ?? []).map((s: ResolvedSkill) => ({
+      name: s.name,
+      description: s.description,
+      source: s.source,
+      filePath: s.filePath,
+      disableModelInvocation: s.disableModelInvocation ?? false,
+    }));
   } catch {
     return [];
   }
@@ -126,13 +114,7 @@ const TOOL_META: Record<string, { description: string; category: string }> = {
 
 export function getToolsForAgent(agentId: string): ResolvedTool[] {
   try {
-    const sessionsPath = path.join(
-      OPENCLAW_DIR,
-      "agents",
-      agentId,
-      "sessions",
-      "sessions.json",
-    );
+    const sessionsPath = path.join(OPENCLAW_DIR, "agents", agentId, "sessions", "sessions.json");
     if (!fs.existsSync(sessionsPath)) return [];
     const data = JSON.parse(fs.readFileSync(sessionsPath, "utf-8"));
 
@@ -147,10 +129,7 @@ export function getToolsForAgent(agentId: string): ResolvedTool[] {
 
     let latest: SessionEntry | null = null;
     for (const entry of Object.values(data) as SessionEntry[]) {
-      if (
-        entry.updatedAt &&
-        (!latest || !latest.updatedAt || entry.updatedAt > latest.updatedAt)
-      ) {
+      if (entry.updatedAt && (!latest || !latest.updatedAt || entry.updatedAt > latest.updatedAt)) {
         latest = entry;
       }
     }
@@ -194,9 +173,7 @@ function extractUserPreview(rawText: string): string | undefined {
   if (rawText.includes("[System Message]")) return undefined;
   if (rawText.startsWith("A new session was started")) return undefined;
 
-  const match = rawText.match(
-    /\[[A-Z][a-z]{2}\s\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}\s\w+\]\s*(.*)/s,
-  );
+  const match = rawText.match(/\[[A-Z][a-z]{2}\s\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}\s\w+\]\s*(.*)/s);
   if (match && !match[1].startsWith("[System Message]")) {
     return match[1].slice(0, 120);
   }
@@ -238,9 +215,7 @@ export function getSessionsForAgent(agentId: string): SessionSummary[] {
             const role = msg?.role;
             if (role === "user") {
               messageCount++;
-              const textBlock = msg.content?.find(
-                (c: Record<string, string>) => c.type === "text",
-              );
+              const textBlock = msg.content?.find((c: Record<string, string>) => c.type === "text");
               if (textBlock?.text) {
                 lastUserMessage = extractUserPreview(textBlock.text);
               }
@@ -275,8 +250,7 @@ export function getSessionsForAgent(agentId: string): SessionSummary[] {
   }
 
   return sessions.sort(
-    (a, b) =>
-      new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime(),
+    (a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime(),
   );
 }
 
@@ -288,9 +262,7 @@ function parseMessageContent(
 ): SessionMessage | null {
   if (!msg) return null;
   const ts: number =
-    typeof msg.timestamp === "number"
-      ? msg.timestamp
-      : new Date(obj.timestamp).getTime();
+    typeof msg.timestamp === "number" ? msg.timestamp : new Date(obj.timestamp).getTime();
 
   if (msg.role === "user") {
     const blocks: ContentBlock[] = (msg.content || [])
@@ -365,10 +337,7 @@ function parseMessageContent(
   return null;
 }
 
-export function getSession(
-  agentId: string,
-  sessionId: string,
-): ParsedSession | null {
+export function getSession(agentId: string, sessionId: string): ParsedSession | null {
   const sessionsDir = path.join(OPENCLAW_DIR, "agents", agentId, "sessions");
   if (!fs.existsSync(sessionsDir)) return null;
 
@@ -422,10 +391,7 @@ export function getAgentSessionCounts(): Record<
   { active: number; archived: number; total: number }
 > {
   const agents = getAgents();
-  const counts: Record<
-    string,
-    { active: number; archived: number; total: number }
-  > = {};
+  const counts: Record<string, { active: number; archived: number; total: number }> = {};
 
   for (const agent of agents) {
     const sessions = getSessionsForAgent(agent.id);
@@ -461,9 +427,7 @@ export function getUsageData(): UsageRecord[] {
             if (msg?.role !== "assistant" || !msg.usage) continue;
 
             const ts: number =
-              typeof msg.timestamp === "number"
-                ? msg.timestamp
-                : new Date(obj.timestamp).getTime();
+              typeof msg.timestamp === "number" ? msg.timestamp : new Date(obj.timestamp).getTime();
 
             records.push({
               timestamp: ts,
@@ -565,9 +529,7 @@ export function getGatewayInfo(): GatewayInfo {
         }
         const pidMatch = line.match(/PID (\d+)/);
         if (pidMatch) pid = parseInt(pidMatch[1], 10);
-        const hmMatch = line.match(
-          /health-monitor.*interval: (\d+)s, grace: (\d+)s/,
-        );
+        const hmMatch = line.match(/health-monitor.*interval: (\d+)s, grace: (\d+)s/);
         if (hmMatch)
           healthMonitor = {
             interval: parseInt(hmMatch[1], 10),
@@ -609,16 +571,11 @@ export function getPairedDevices(): PairedDevice[] {
     const data = JSON.parse(fs.readFileSync(devicesPath, "utf-8"));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return Object.values(data).map((d: any) => {
-      const tokens = d.tokens as
-        | Record<string, { lastUsedAtMs?: number }>
-        | undefined;
+      const tokens = d.tokens as Record<string, { lastUsedAtMs?: number }> | undefined;
       let lastUsedAtMs: number | null = null;
       if (tokens) {
         for (const t of Object.values(tokens)) {
-          if (
-            t.lastUsedAtMs &&
-            (!lastUsedAtMs || t.lastUsedAtMs > lastUsedAtMs)
-          ) {
+          if (t.lastUsedAtMs && (!lastUsedAtMs || t.lastUsedAtMs > lastUsedAtMs)) {
             lastUsedAtMs = t.lastUsedAtMs;
           }
         }
@@ -653,10 +610,7 @@ export function getActiveSessions(): (SessionSummary & {
       }
     }
   }
-  return active.sort(
-    (a, b) =>
-      new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime(),
-  );
+  return active.sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime());
 }
 
 const CORE_FILE_NAMES = [
@@ -671,11 +625,8 @@ const CORE_FILE_NAMES = [
 
 export type CoreFile = { name: string; content: string | null };
 
-export function getCoreFilesForAgent(
-  workspace: string | undefined,
-): CoreFile[] {
-  if (!workspace)
-    return CORE_FILE_NAMES.map((name) => ({ name, content: null }));
+export function getCoreFilesForAgent(workspace: string | undefined): CoreFile[] {
+  if (!workspace) return CORE_FILE_NAMES.map((name) => ({ name, content: null }));
 
   return CORE_FILE_NAMES.map((name) => {
     const filePath = path.join(workspace, name);
@@ -699,8 +650,5 @@ export function getAllSessions(): (SessionSummary & { agentName: string })[] {
       all.push({ ...s, agentName: agent.name });
     }
   }
-  return all.sort(
-    (a, b) =>
-      new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime(),
-  );
+  return all.sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime());
 }

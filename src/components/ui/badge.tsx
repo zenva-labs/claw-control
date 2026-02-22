@@ -5,23 +5,22 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-sm border border-transparent px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+  "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-sm border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-        secondary:
-          "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+        secondary: "bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
         destructive:
-          "bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "bg-destructive [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white",
         outline:
           "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         success:
-          "bg-green-50 text-green-900 border-green-200 [a&]:hover:bg-green-100 dark:bg-green-900/80 dark:text-white dark:border-green-800",
-        info: "bg-blue-50 text-blue-900 border-blue-200 [a&]:hover:bg-blue-100 dark:bg-blue-900/80 dark:text-white dark:border-blue-800",
+          "border-green-200 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-900/80 dark:text-white [a&]:hover:bg-green-100",
+        info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-900/80 dark:text-white [a&]:hover:bg-blue-100",
         danger:
-          "bg-red-50 text-red-900 border-red-200 [a&]:hover:bg-red-100 dark:bg-red-900/80 dark:text-white dark:border-red-800",
+          "border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-900/80 dark:text-white [a&]:hover:bg-red-100",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
       },
     },

@@ -27,12 +27,10 @@ export default function AllSessionsPage() {
   return (
     <Container fullWidth>
       <PageBreadcrumb page="Sessions" />
-      <div className="flex items-end justify-between gap-1 mb-3">
+      <div className="mb-3 flex items-end justify-between gap-1">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            All Sessions
-          </h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight">All Sessions</h1>
+          <p className="text-muted-foreground text-sm">
             All active and archived sessions across all agents.
           </p>
         </div>
@@ -61,9 +59,7 @@ export default function AllSessionsPage() {
       </div>
 
       {sessions.length === 0 ? (
-        <p className="text-muted-foreground text-sm py-8 text-center">
-          No sessions found.
-        </p>
+        <p className="text-muted-foreground py-8 text-center text-sm">No sessions found.</p>
       ) : (
         <SessionsTable sessions={rows} />
       )}

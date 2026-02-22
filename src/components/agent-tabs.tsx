@@ -2,12 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  NavTabs,
-  NavTabsList,
-  NavTabsTrigger,
-  NavTabsContent,
-} from "@/components/ui/nav-tabs";
+import { NavTabs, NavTabsList, NavTabsTrigger, NavTabsContent } from "@/components/ui/nav-tabs";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SessionsTable } from "@/components/sessions-table";
 import { UsageDashboard } from "@/components/usage-dashboard";
@@ -27,21 +22,9 @@ import {
 import { SetBreadcrumbs } from "@/components/breadcrumb-provider";
 import { CoreFilesTab } from "@/components/core-files-tab";
 import type { CoreFile } from "@/lib/openclaw";
-import {
-  ClockIcon,
-  BotIcon,
-  SparklesIcon,
-  WrenchIcon,
-  SearchIcon,
-} from "lucide-react";
+import { ClockIcon, BotIcon, SparklesIcon, WrenchIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
-import type {
-  AgentConfig,
-  CronJob,
-  ResolvedSkill,
-  ResolvedTool,
-  UsageRecord,
-} from "@/lib/types";
+import type { AgentConfig, CronJob, ResolvedSkill, ResolvedTool, UsageRecord } from "@/lib/types";
 
 type SessionRow = {
   id: string;
@@ -101,12 +84,10 @@ export function AgentTabs({
           </BreadcrumbList>
         </Breadcrumb>
       </SetBreadcrumbs>
-      <div className="border-b mb-3">
+      <div className="mb-3 border-b">
         <Container>
-          <div className="flex items-center gap-3 mt-1 mb-2 justify-between">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {agent.name}
-            </h1>
+          <div className="mt-1 mb-2 flex items-center justify-between gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight">{agent.name}</h1>
             <Badge variant="outline" className="font-mono text-[11px]">
               {agent.model}
             </Badge>
@@ -134,10 +115,7 @@ export function AgentTabs({
         <Container className="space-y-3 pt-1">
           <Card>
             <CardContent className="space-y-0 divide-y">
-              <DetailRow
-                label="ID"
-                value={<span className="font-mono text-xs">{agent.id}</span>}
-              />
+              <DetailRow label="ID" value={<span className="font-mono text-xs">{agent.id}</span>} />
               <DetailRow label="Name" value={agent.name} />
               <DetailRow
                 label="Model"
@@ -146,9 +124,7 @@ export function AgentTabs({
               {agent.workspace && (
                 <DetailRow
                   label="Workspace"
-                  value={
-                    <span className="font-mono text-xs">{agent.workspace}</span>
-                  }
+                  value={<span className="font-mono text-xs">{agent.workspace}</span>}
                 />
               )}
               <DetailRow
@@ -167,23 +143,15 @@ export function AgentTabs({
             <CardContent className="space-y-0 divide-y">
               <DetailRow
                 label="Active Sessions"
-                value={
-                  <span className="tabular-nums">{sessionCounts.active}</span>
-                }
+                value={<span className="tabular-nums">{sessionCounts.active}</span>}
               />
               <DetailRow
                 label="Archived Sessions"
-                value={
-                  <span className="tabular-nums">{sessionCounts.archived}</span>
-                }
+                value={<span className="tabular-nums">{sessionCounts.archived}</span>}
               />
               <DetailRow
                 label="Total Sessions"
-                value={
-                  <span className="tabular-nums font-medium">
-                    {sessionCounts.total}
-                  </span>
-                }
+                value={<span className="font-medium tabular-nums">{sessionCounts.total}</span>}
               />
             </CardContent>
           </Card>
@@ -193,7 +161,7 @@ export function AgentTabs({
 
       <NavTabsContent value="sessions">
         {sessions.length === 0 ? (
-          <p className="text-muted-foreground text-sm py-8 text-center">
+          <p className="text-muted-foreground py-8 text-center text-sm">
             No sessions found for this agent.
           </p>
         ) : (
@@ -207,12 +175,12 @@ export function AgentTabs({
         <Container>
           {tools.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
-              <div className="rounded-full bg-muted p-3">
-                <WrenchIcon className="size-6 text-muted-foreground" />
+              <div className="bg-muted rounded-full p-3">
+                <WrenchIcon className="text-muted-foreground size-6" />
               </div>
               <div>
-                <p className="font-medium text-sm">No tools</p>
-                <p className="text-muted-foreground text-sm mt-0.5">
+                <p className="text-sm font-medium">No tools</p>
+                <p className="text-muted-foreground mt-0.5 text-sm">
                   No tools have been resolved for this agent yet.
                 </p>
               </div>
@@ -233,12 +201,12 @@ export function AgentTabs({
         <Container>
           {cronJobs.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
-              <div className="rounded-full bg-muted p-3">
-                <ClockIcon className="size-6 text-muted-foreground" />
+              <div className="bg-muted rounded-full p-3">
+                <ClockIcon className="text-muted-foreground size-6" />
               </div>
               <div>
-                <p className="font-medium text-sm">No cron jobs</p>
-                <p className="text-muted-foreground text-sm mt-0.5">
+                <p className="text-sm font-medium">No cron jobs</p>
+                <p className="text-muted-foreground mt-0.5 text-sm">
                   No scheduled jobs for this agent.
                 </p>
               </div>
@@ -267,13 +235,10 @@ function SkillsPanel({ skills }: { skills: ResolvedSkill[] }) {
   const enabled = skills.filter((s) => !s.disableModelInvocation);
   const disabled = skills.filter((s) => s.disableModelInvocation);
 
-  const listForFilter =
-    filter === "enabled" ? enabled : filter === "disabled" ? disabled : skills;
+  const listForFilter = filter === "enabled" ? enabled : filter === "disabled" ? disabled : skills;
 
   const filtered = search.trim()
-    ? listForFilter.filter((s) =>
-        s.name.toLowerCase().includes(search.trim().toLowerCase()),
-      )
+    ? listForFilter.filter((s) => s.name.toLowerCase().includes(search.trim().toLowerCase()))
     : listForFilter;
 
   const counts = {
@@ -297,12 +262,12 @@ function SkillsPanel({ skills }: { skills: ResolvedSkill[] }) {
           </TabsTrigger>
         </TabsList>
         <div className="relative w-56">
-          <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+          <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
           <Input
             placeholder="Search skills…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-8 text-sm"
+            className="h-8 pl-8 text-sm"
           />
         </div>
       </div>
@@ -335,12 +300,12 @@ function SkillsList({
           : "No skills have been added to this agent yet.";
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
-        <div className="rounded-full bg-muted p-3">
-          <SparklesIcon className="size-6 text-muted-foreground" />
+        <div className="bg-muted rounded-full p-3">
+          <SparklesIcon className="text-muted-foreground size-6" />
         </div>
         <div>
-          <p className="font-medium text-sm">No skills</p>
-          <p className="text-muted-foreground text-sm mt-0.5">{message}</p>
+          <p className="text-sm font-medium">No skills</p>
+          <p className="text-muted-foreground mt-0.5 text-sm">{message}</p>
         </div>
       </div>
     );
@@ -352,13 +317,11 @@ function SkillsList({
         <Card key={skill.name}>
           <CardContent>
             <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1 min-w-0">
+              <div className="min-w-0 space-y-1">
                 <p className="font-mono text-sm font-medium">{skill.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {skill.description}
-                </p>
+                <p className="text-muted-foreground text-sm">{skill.description}</p>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex shrink-0 items-center gap-1">
                 <Badge
                   variant={skill.disableModelInvocation ? "danger" : "success"}
                   className="text-[11px]"
@@ -406,18 +369,13 @@ function ToolsGrid({ tools }: { tools: ResolvedTool[] }) {
       {sortedCategories.map((category) => (
         <Card key={category}>
           <CardContent>
-            <p className="text-sm font-medium mb-2">{category}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <p className="mb-2 text-sm font-medium">{category}</p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {grouped.get(category)!.map((tool) => (
-                <div
-                  key={tool.name}
-                  className="flex items-start gap-2 rounded-md border px-3 py-2"
-                >
+                <div key={tool.name} className="flex items-start gap-2 rounded-md border px-3 py-2">
                   <div className="min-w-0">
                     <p className="font-mono text-xs font-medium">{tool.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {tool.description}
-                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">{tool.description}</p>
                   </div>
                 </div>
               ))}
@@ -429,19 +387,13 @@ function ToolsGrid({ tools }: { tools: ResolvedTool[] }) {
   );
 }
 
-function SubagentsCard({
-  agent,
-  allAgents,
-}: {
-  agent: AgentConfig;
-  allAgents: AgentConfig[];
-}) {
+function SubagentsCard({ agent, allAgents }: { agent: AgentConfig; allAgents: AgentConfig[] }) {
   const allowedIds = agent.subagents?.allowAgents ?? [];
 
   return (
     <Card>
       <CardContent className="space-y-0 divide-y">
-        <div className="flex items-center gap-2 py-2.5 text-sm font-medium text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-2 py-2.5 text-sm font-medium">
           <BotIcon className="size-3.5" />
           Allowed Subagents
           {allowedIds.length > 0 && (
@@ -451,27 +403,20 @@ function SubagentsCard({
           )}
         </div>
         {allowedIds.length === 0 ? (
-          <p className="py-3 text-sm text-muted-foreground">
-            No subagents configured.
-          </p>
+          <p className="text-muted-foreground py-3 text-sm">No subagents configured.</p>
         ) : (
           allowedIds.map((id) => {
             const subagent = allAgents.find((a) => a.id === id);
             return (
-              <div
-                key={id}
-                className="flex items-center justify-between py-2.5 text-sm"
-              >
+              <div key={id} className="flex items-center justify-between py-2.5 text-sm">
                 <Link
                   href={`/agents/${id}`}
-                  className="font-mono text-xs hover:underline text-foreground"
+                  className="text-foreground font-mono text-xs hover:underline"
                 >
                   {subagent?.name ?? id}
                 </Link>
                 {subagent ? (
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {subagent.model}
-                  </span>
+                  <span className="text-muted-foreground font-mono text-xs">{subagent.model}</span>
                 ) : (
                   <Badge variant="outline" className="text-xs">
                     unknown
@@ -486,13 +431,7 @@ function SubagentsCard({
   );
 }
 
-function DetailRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
+function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between py-2.5 text-sm">
       <span className="text-muted-foreground">{label}</span>

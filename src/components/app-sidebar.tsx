@@ -32,9 +32,7 @@ const navItems = [
   { href: "/cron", label: "Cron Jobs", icon: ClockIcon },
 ];
 
-const bottomNavItems = [
-  { href: "/settings", label: "Settings", icon: SettingsIcon },
-];
+const bottomNavItems = [{ href: "/settings", label: "Settings", icon: SettingsIcon }];
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -46,7 +44,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <div className="bg-foreground text-background flex aspect-square size-8 items-center justify-center rounded-md dark:bg-background dark:text-foreground border">
+                <div className="bg-foreground text-background dark:bg-background dark:text-foreground flex aspect-square size-8 items-center justify-center rounded-md border">
                   <CommandIcon className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
@@ -62,15 +60,10 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map(({ href, label, icon: Icon }) => {
-                const isActive =
-                  href === "/" ? pathname === "/" : pathname.startsWith(href);
+                const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
                 return (
                   <SidebarMenuItem key={href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={label}
-                    >
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
                       <Link href={href}>
                         <Icon />
                         <span>{label}</span>
@@ -90,11 +83,7 @@ export function AppSidebar() {
                 const isActive = pathname.startsWith(href);
                 return (
                   <SidebarMenuItem key={href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={label}
-                    >
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
                       <Link href={href}>
                         <Icon />
                         <span>{label}</span>

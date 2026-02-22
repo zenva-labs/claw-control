@@ -3,13 +3,7 @@
 import { useState, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UsageRecord } from "@/lib/types";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -18,15 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
 
 type TimeRange = "week" | "7d" | "30d" | "all";
@@ -114,10 +100,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
     return records.filter((r) => r.timestamp >= cutoff);
   }, [records, range]);
 
-  const dateRangeLabel = useMemo(
-    () => formatDateRange(range, records),
-    [range, records],
-  );
+  const dateRangeLabel = useMemo(() => formatDateRange(range, records), [range, records]);
 
   const stats = useMemo(() => {
     let totalCost = 0;
@@ -256,7 +239,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
   return (
     <div className="space-y-3">
       {/* Time range selector */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <Tabs
           value={range}
           onValueChange={(v) => setRange(v as TimeRange)}
@@ -270,43 +253,39 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
             ))}
           </TabsList>
         </Tabs>
-        <div className="text-sm shrink-0 text-muted-foreground">
-          {dateRangeLabel}
-        </div>
+        <div className="text-muted-foreground shrink-0 text-sm">{dateRangeLabel}</div>
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Card>
           <CardContent>
-            <div className="text-sm text-muted-foreground">Total Cost</div>
-            <div className="text-2xl font-bold tabular-nums mt-1">
+            <div className="text-muted-foreground text-sm">Total Cost</div>
+            <div className="mt-1 text-2xl font-bold tabular-nums">
               {formatCost(stats.totalCost)}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <div className="text-sm text-muted-foreground">Total Tokens</div>
-            <div className="text-2xl font-bold tabular-nums mt-1">
+            <div className="text-muted-foreground text-sm">Total Tokens</div>
+            <div className="mt-1 text-2xl font-bold tabular-nums">
               {formatTokens(stats.totalTokens)}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <div className="text-sm text-muted-foreground">Sessions</div>
-            <div className="text-2xl font-bold tabular-nums mt-1">
+            <div className="text-muted-foreground text-sm">Sessions</div>
+            <div className="mt-1 text-2xl font-bold tabular-nums">
               {stats.sessionCount.toLocaleString()}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <div className="text-sm text-muted-foreground">
-              Avg Cost / Session
-            </div>
-            <div className="text-2xl font-bold tabular-nums mt-1">
+            <div className="text-muted-foreground text-sm">Avg Cost / Session</div>
+            <div className="mt-1 text-2xl font-bold tabular-nums">
               {formatCost(stats.avgCostPerSession)}
             </div>
           </CardContent>
@@ -317,17 +296,13 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
       {modelDistribution.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">
-              Cost Distribution by Model
-            </CardTitle>
+            <CardTitle className="text-sm">Cost Distribution by Model</CardTitle>
             <CardAction>
-              <span className="text-xs text-muted-foreground">
-                {dateRangeLabel}
-              </span>
+              <span className="text-muted-foreground text-xs">{dateRangeLabel}</span>
             </CardAction>
           </CardHeader>
           <CardContent>
-            <div className="flex h-6 rounded-sm overflow-hidden">
+            <div className="flex h-6 overflow-hidden rounded-sm">
               {modelDistribution.map((m, i) => (
                 <div
                   key={m.model}
@@ -341,22 +316,17 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
                 />
               ))}
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
               {modelDistribution.map((m, i) => (
-                <div
-                  key={m.model}
-                  className="flex items-center gap-1.5 text-xs"
-                >
+                <div key={m.model} className="flex items-center gap-1.5 text-xs">
                   <div
-                    className="size-2.5 rounded-sm shrink-0"
+                    className="size-2.5 shrink-0 rounded-sm"
                     style={{
                       backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
                       opacity: 0.8,
                     }}
                   />
-                  <span className="font-mono text-muted-foreground">
-                    {m.model}
-                  </span>
+                  <span className="text-muted-foreground font-mono">{m.model}</span>
                   <span className="tabular-nums">{m.pct.toFixed(1)}%</span>
                 </div>
               ))}
@@ -371,9 +341,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
           <CardHeader>
             <CardTitle className="text-sm">Daily Cost</CardTitle>
             <CardAction>
-              <span className="text-xs text-muted-foreground">
-                {dateRangeLabel}
-              </span>
+              <span className="text-muted-foreground text-xs">{dateRangeLabel}</span>
             </CardAction>
           </CardHeader>
           <CardContent>
@@ -421,9 +389,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
                       fill={CHART_COLORS[i % CHART_COLORS.length]}
                       opacity={0.8}
                       isAnimationActive={false}
-                      radius={
-                        i === chartModels.length - 1 ? [2, 2, 0, 0] : undefined
-                      }
+                      radius={i === chartModels.length - 1 ? [2, 2, 0, 0] : undefined}
                     />
                   ))}
                 </BarChart>
@@ -438,9 +404,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
         <CardHeader>
           <CardTitle className="text-sm">Cost by Model</CardTitle>
           <CardAction>
-            <span className="text-xs text-muted-foreground">
-              {dateRangeLabel}
-            </span>
+            <span className="text-muted-foreground text-xs">{dateRangeLabel}</span>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -448,41 +412,38 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Model</TableHead>
-                <TableHead className="text-right w-24">Input</TableHead>
-                <TableHead className="text-right w-24">Cached</TableHead>
-                <TableHead className="text-right w-24">Output</TableHead>
-                <TableHead className="text-right w-24">Total</TableHead>
-                <TableHead className="text-right w-24">Cost</TableHead>
-                <TableHead className="text-right w-14">%</TableHead>
-                <TableHead className="text-right w-20">Requests</TableHead>
+                <TableHead className="w-24 text-right">Input</TableHead>
+                <TableHead className="w-24 text-right">Cached</TableHead>
+                <TableHead className="w-24 text-right">Output</TableHead>
+                <TableHead className="w-24 text-right">Total</TableHead>
+                <TableHead className="w-24 text-right">Cost</TableHead>
+                <TableHead className="w-14 text-right">%</TableHead>
+                <TableHead className="w-20 text-right">Requests</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {stats.modelBreakdown.map((m) => (
                 <TableRow key={m.model}>
                   <TableCell className="font-mono text-xs">{m.model}</TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {m.input.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {m.cached.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {m.output.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm font-medium">
+                  <TableCell className="text-right text-sm font-medium tabular-nums">
                     {m.totalTokens.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm font-medium">
+                  <TableCell className="text-right text-sm font-medium tabular-nums">
                     {formatCost(m.cost)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm text-muted-foreground">
-                    {stats.totalCost > 0
-                      ? ((m.cost / stats.totalCost) * 100).toFixed(1)
-                      : "0"}
-                    %
+                  <TableCell className="text-muted-foreground text-right text-sm tabular-nums">
+                    {stats.totalCost > 0 ? ((m.cost / stats.totalCost) * 100).toFixed(1) : "0"}%
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-right text-sm tabular-nums">
                     {m.count.toLocaleString()}
                   </TableCell>
                 </TableRow>
@@ -490,23 +451,23 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
               {stats.modelBreakdown.length > 1 && (
                 <TableRow className="font-medium">
                   <TableCell className="text-sm">Total</TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {stats.totalInput.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {stats.totalCached.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {stats.totalOutput.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {stats.totalTokens.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {formatCost(stats.totalCost)}
                   </TableCell>
                   <TableCell />
-                  <TableCell className="text-right tabular-nums text-sm text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-right text-sm tabular-nums">
                     {filtered.length.toLocaleString()}
                   </TableCell>
                 </TableRow>
@@ -521,9 +482,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
         <CardHeader>
           <CardTitle className="text-sm">Cost by Agent</CardTitle>
           <CardAction>
-            <span className="text-xs text-muted-foreground">
-              {dateRangeLabel}
-            </span>
+            <span className="text-muted-foreground text-xs">{dateRangeLabel}</span>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -531,26 +490,23 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Agent</TableHead>
-                <TableHead className="text-right w-24">Sessions</TableHead>
-                <TableHead className="text-right w-24">Cost</TableHead>
-                <TableHead className="text-right w-16">%</TableHead>
+                <TableHead className="w-24 text-right">Sessions</TableHead>
+                <TableHead className="w-24 text-right">Cost</TableHead>
+                <TableHead className="w-16 text-right">%</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {stats.agentBreakdown.map((a) => (
                 <TableRow key={a.id}>
                   <TableCell className="text-sm">{a.name}</TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {a.sessionCount}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {formatCost(a.cost)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-sm text-muted-foreground">
-                    {stats.totalCost > 0
-                      ? ((a.cost / stats.totalCost) * 100).toFixed(1)
-                      : "0"}
-                    %
+                  <TableCell className="text-muted-foreground text-right text-sm tabular-nums">
+                    {stats.totalCost > 0 ? ((a.cost / stats.totalCost) * 100).toFixed(1) : "0"}%
                   </TableCell>
                 </TableRow>
               ))}
@@ -560,7 +516,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
       </Card>
 
       {filtered.length === 0 && (
-        <p className="text-muted-foreground text-sm py-8 text-center">
+        <p className="text-muted-foreground py-8 text-center text-sm">
           No usage data for the selected time range.
         </p>
       )}

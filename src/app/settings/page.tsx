@@ -6,12 +6,11 @@ import { PageBreadcrumb } from "@/components/page-breadcrumb";
 import { useTheme, type Theme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 
-const themeOptions: { value: Theme; label: string; icon: React.ElementType }[] =
-  [
-    { value: "system", label: "System", icon: MonitorIcon },
-    { value: "light", label: "Light", icon: SunIcon },
-    { value: "dark", label: "Dark", icon: MoonIcon },
-  ];
+const themeOptions: { value: Theme; label: string; icon: React.ElementType }[] = [
+  { value: "system", label: "System", icon: MonitorIcon },
+  { value: "light", label: "Light", icon: SunIcon },
+  { value: "dark", label: "Dark", icon: MoonIcon },
+];
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -22,20 +21,16 @@ export default function SettingsPage() {
       <div className="space-y-3">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your Claw Control preferences.
-          </p>
+          <p className="text-muted-foreground text-sm">Manage your Claw Control preferences.</p>
         </div>
 
-        <div className="border rounded-lg divide-y">
-          <div className="p-4 flex items-center justify-between gap-4">
+        <div className="divide-y rounded-lg border">
+          <div className="flex items-center justify-between gap-4 p-4">
             <div>
               <p className="text-sm font-medium">Theme</p>
-              <p className="text-sm text-muted-foreground">
-                Choose your preferred color scheme.
-              </p>
+              <p className="text-muted-foreground text-sm">Choose your preferred color scheme.</p>
             </div>
-            <div className="flex gap-1 rounded-md border p-1 bg-secondary shrink-0">
+            <div className="bg-secondary flex shrink-0 gap-1 rounded-md border p-1">
               {themeOptions.map(({ value, label, icon: Icon }) => (
                 <button
                   key={value}

@@ -34,9 +34,7 @@ export default async function AgentPage({
 }) {
   const { agentId } = await params;
   const { tab } = await searchParams;
-  const activeTab: AgentTab = VALID_TABS.includes(tab as AgentTab)
-    ? (tab as AgentTab)
-    : "usage";
+  const activeTab: AgentTab = VALID_TABS.includes(tab as AgentTab) ? (tab as AgentTab) : "usage";
   const agents = getAgents();
   const agent = agents.find((a) => a.id === agentId);
   if (!agent) notFound();

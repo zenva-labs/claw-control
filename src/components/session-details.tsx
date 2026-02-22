@@ -13,12 +13,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { SetBreadcrumbs } from "@/components/breadcrumb-provider";
-import {
-  NavTabs,
-  NavTabsContent,
-  NavTabsList,
-  NavTabsTrigger,
-} from "@/components/ui/nav-tabs";
+import { NavTabs, NavTabsContent, NavTabsList, NavTabsTrigger } from "@/components/ui/nav-tabs";
 import { Container } from "@/components/ui/container";
 import { SessionChat } from "@/components/session-chat";
 import { SessionMetrics } from "@/components/session-metrics";
@@ -97,9 +92,7 @@ export function SessionDetails({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/agents/${agentId}`}>
-                {agentName}
-              </BreadcrumbLink>
+              <BreadcrumbLink href={`/agents/${agentId}`}>{agentName}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -110,13 +103,11 @@ export function SessionDetails({
           </BreadcrumbList>
         </Breadcrumb>
       </SetBreadcrumbs>
-      <div className="border-b mb-3">
+      <div className="mb-3 border-b">
         <Container>
-          <div className="flex items-center justify-between gap-3 mb-1 flex-wrap mt-1">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl font-semibold tracking-tight font-mono">
-                {sessionId}
-              </h1>
+          <div className="mt-1 mb-1 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-mono text-xl font-semibold tracking-tight">{sessionId}</h1>
             </div>
             <div className="flex items-center gap-1">
               {session.model && (
@@ -124,21 +115,15 @@ export function SessionDetails({
                   {session.provider}/{session.model}
                 </Badge>
               )}
-              <Badge
-                variant={statusVariant(session.status)}
-                className="text-[11px]"
-              >
+              <Badge variant={statusVariant(session.status)} className="text-[11px]">
                 {getStatusLabel(session.status)}
               </Badge>
             </div>
           </div>
 
-          <div className="flex gap-4 text-xs text-muted-foreground mb-2 flex-wrap">
+          <div className="text-muted-foreground mb-2 flex flex-wrap gap-4 text-xs">
             {session.startedAt && (
-              <span>
-                Started{" "}
-                {format(new Date(session.startedAt), "MMM d, yyyy, h:mm a")}
-              </span>
+              <span>Started {format(new Date(session.startedAt), "MMM d, yyyy, h:mm a")}</span>
             )}
           </div>
 
