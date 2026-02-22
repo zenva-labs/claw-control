@@ -7,10 +7,25 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SecretField } from "@/components/secret-field";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { SetBreadcrumbs } from "@/components/breadcrumb-provider";
 import { MonitorIcon, ShieldIcon, MessageSquareMoreIcon } from "lucide-react";
 import Link from "next/link";
 import { format, formatDistanceToNow, intervalToDuration } from "date-fns";
 import type { GatewayInfo, PairedDevice, SessionSummary } from "@/lib/types";
+
+const TAB_LABELS: Record<string, string> = {
+  overview: "Overview",
+  instances: "Instances",
+  sessions: "Sessions",
+};
 
 type HealthStatus = "checking" | "online" | "offline";
 
@@ -381,6 +396,19 @@ export function GatewayPageTabs({
 
   return (
     <NavTabs value={activeTab} onValueChange={handleTabChange}>
+      <SetBreadcrumbs>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/gateway">Gateway</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{TAB_LABELS[activeTab] ?? activeTab}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </SetBreadcrumbs>
       <div className="mb-3 border-b">
         <Container>
           <div className="mb-2 flex items-center justify-between gap-3">

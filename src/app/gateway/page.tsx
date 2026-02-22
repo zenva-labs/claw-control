@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getGatewayInfo, getPairedDevices, getActiveSessions } from "@/lib/openclaw";
 import { GatewayPageTabs } from "@/components/gateway-page-tabs";
-import { PageBreadcrumb } from "@/components/page-breadcrumb";
 
 export const metadata: Metadata = { title: "Gateway" };
 export const dynamic = "force-dynamic";
@@ -24,9 +23,6 @@ export default async function GatewayPage({
   const sessions = getActiveSessions();
 
   return (
-    <>
-      <PageBreadcrumb page="Gateway" />
-      <GatewayPageTabs info={info} devices={devices} sessions={sessions} activeTab={activeTab} />
-    </>
+    <GatewayPageTabs info={info} devices={devices} sessions={sessions} activeTab={activeTab} />
   );
 }
