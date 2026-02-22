@@ -39,6 +39,16 @@ type SessionRow = {
 
 type SessionCounts = { active: number; archived: number; total: number };
 
+const TAB_LABELS: Record<string, string> = {
+  usage: "Usage",
+  details: "Details",
+  sessions: "Sessions",
+  tools: "Tools",
+  skills: "Skills",
+  cron: "Cron Jobs",
+  "core-files": "Core Files",
+};
+
 export function AgentTabs({
   agent,
   allAgents,
@@ -79,7 +89,11 @@ export function AgentTabs({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{agent.name}</BreadcrumbPage>
+              <BreadcrumbLink href={`/agents/${agent.id}`}>{agent.name}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{TAB_LABELS[activeTab] ?? activeTab}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

@@ -24,6 +24,11 @@ import { format } from "date-fns";
 
 const POLL_INTERVAL = 2000;
 
+const SESSION_TAB_LABELS: Record<string, string> = {
+  chat: "Chat",
+  metrics: "Metrics",
+};
+
 export function SessionDetails({
   agentId,
   agentName,
@@ -96,9 +101,13 @@ export function SessionDetails({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="font-mono text-xs">
+              <BreadcrumbLink href={`/agents/${agentId}/sessions/${sessionId}`} className="font-mono text-xs">
                 {sessionId.slice(0, 8)}...
-              </BreadcrumbPage>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{SESSION_TAB_LABELS[activeTab] ?? activeTab}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
