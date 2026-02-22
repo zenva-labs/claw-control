@@ -13,6 +13,7 @@ import {
   SparklesIcon,
   SettingsIcon,
   BookOpenIcon,
+  CableIcon,
 } from "lucide-react";
 
 import {
@@ -41,6 +42,7 @@ const navGroups = [
     items: [
       { href: "/gateway", label: "Gateway", icon: RadioIcon },
       { href: "/usage", label: "Usage", icon: BarChart3Icon },
+      { href: "/channels", label: "Channels", icon: CableIcon },
       { href: "/logs", label: "Logs", icon: ScrollTextIcon },
     ],
   },
