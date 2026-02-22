@@ -2,14 +2,20 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { DEFAULT_USAGE_REFRESH_INTERVAL, STORAGE_KEYS } from "@/lib/constants";
 
 export function UsagePageClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [refreshInterval] = useLocalStorage(
+    STORAGE_KEYS.USAGE_REFRESH_INTERVAL,
+    DEFAULT_USAGE_REFRESH_INTERVAL,
+  );
 
   useEffect(() => {
-    const interval = setInterval(() => router.refresh(), 30_000);
-    return () => clearInterval(interval);
-  }, [router]);
+    const id = setInterval(() => router.refresh(), refreshInterval);
+    return () => clearInterval(id);
+  }, [router, refreshInterval]);
 
   return (
     <div className="relative">

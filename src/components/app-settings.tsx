@@ -3,6 +3,20 @@
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Theme, useTheme } from "@/hooks/use-theme";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DEFAULT_USAGE_REFRESH_INTERVAL,
+  STORAGE_KEYS,
+  USAGE_REFRESH_OPTIONS,
+} from "@/lib/constants";
+import Link from "next/link";
 
 const themeOptions: { value: Theme; label: string; icon: React.ElementType }[] = [
   { value: "system", label: "System", icon: MonitorIcon },
@@ -12,6 +26,10 @@ const themeOptions: { value: Theme; label: string; icon: React.ElementType }[] =
 
 export default function AppSettings() {
   const { theme, setTheme } = useTheme();
+  const [refreshInterval, setRefreshInterval] = useLocalStorage(
+    STORAGE_KEYS.USAGE_REFRESH_INTERVAL,
+    DEFAULT_USAGE_REFRESH_INTERVAL,
+  );
 
   return (
     <div className="space-y-3">
@@ -43,6 +61,34 @@ export default function AppSettings() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 p-4">
+          <div>
+            <p className="text-sm font-medium">Usage metrics refresh interval</p>
+            <p className="text-muted-foreground text-sm">
+              How often the{" "}
+              <Link href="/usage" className="text-primary underline">
+                usage page
+              </Link>{" "}
+              polls for new data.
+            </p>
+          </div>
+          <Select
+            value={String(refreshInterval)}
+            onValueChange={(v) => setRefreshInterval(Number(v))}
+          >
+            <SelectTrigger className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {USAGE_REFRESH_OPTIONS.map(({ label, value }) => (
+                <SelectItem key={value} value={String(value)}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
