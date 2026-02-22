@@ -8,6 +8,7 @@ import {
   ClockIcon,
   MessageSquareMoreIcon,
   RadioIcon,
+  ScrollTextIcon,
   SparklesIcon,
   SettingsIcon,
 } from "lucide-react";
@@ -30,6 +31,7 @@ const navItems = [
   { href: "/gateway", label: "Gateway", icon: RadioIcon },
   { href: "/usage", label: "Usage", icon: BarChart3Icon },
   { href: "/cron", label: "Cron Jobs", icon: ClockIcon },
+  { href: "/logs", label: "Logs", icon: ScrollTextIcon },
 ];
 
 const bottomNavItems = [{ href: "/settings", label: "Settings", icon: SettingsIcon }];

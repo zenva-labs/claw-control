@@ -17,10 +17,10 @@ const badgeVariants = cva(
           "border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         success:
-          "border-green-200 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-900/80 dark:text-white [a&]:hover:bg-green-100",
-        info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-900/80 dark:text-white [a&]:hover:bg-blue-100",
+          "border-green-200 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-900/50 dark:text-white [a&]:hover:bg-green-100",
+        info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-900/50 dark:text-white [a&]:hover:bg-blue-100",
         danger:
-          "border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-900/80 dark:text-white [a&]:hover:bg-red-100",
+          "border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-900/50 dark:text-white [a&]:hover:bg-red-100",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
       },
     },

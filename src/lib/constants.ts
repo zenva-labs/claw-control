@@ -1,5 +1,6 @@
 export const STORAGE_KEYS = {
   USAGE_REFRESH_INTERVAL: "claw-control:usage-refresh-interval",
+  LOG_LEVELS: "claw-control:log-levels",
 } as const;
 
 export const USAGE_REFRESH_OPTIONS = [
