@@ -361,22 +361,61 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
                     tickFormatter={(v: number) => `$${v.toFixed(2)}`}
                   />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--background)",
-                      color: "var(--foreground)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "0.5rem",
-                      fontSize: "12px",
-                      boxShadow: "0 4px 12px rgba(0,0,0,.15)",
-                    }}
-                    labelStyle={{ color: "var(--foreground)" }}
-                    itemStyle={{ color: "var(--foreground)" }}
                     cursor={{ fill: "var(--muted)", opacity: 0.5 }}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    formatter={(value: any, name: any) => [
-                      `$${Number(value).toFixed(4)}`,
-                      String(name),
-                    ]}
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      const sorted = [...payload].sort(
+                        (a, b) => Number(b.value ?? 0) - Number(a.value ?? 0),
+                      );
+                      const total = sorted.reduce(
+                        (sum, entry) => sum + Number(entry.value ?? 0),
+                        0,
+                      );
+                      return (
+                        <div
+                          style={{
+                            backgroundColor: "var(--background)",
+                            color: "var(--foreground)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "0.5rem",
+                            fontSize: "12px",
+                            boxShadow: "0 4px 12px rgba(0,0,0,.15)",
+                            padding: "8px 12px",
+                          }}
+                        >
+                          <p style={{ marginBottom: 4, fontWeight: 600 }}>{label}</p>
+                          {sorted.map((entry) => (
+                            <div
+                              key={String(entry.name)}
+                              style={{ display: "flex", justifyContent: "space-between", gap: 16 }}
+                            >
+                              <span style={{ color: entry.color }}>{String(entry.name)}</span>
+                              <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                                {formatCost(Number(entry.value ?? 0))}
+                              </span>
+                            </div>
+                          ))}
+                          {sorted.length > 1 && (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                gap: 16,
+                                marginTop: 4,
+                                paddingTop: 4,
+                                borderTop: "1px solid var(--border)",
+                                fontWeight: 600,
+                              }}
+                            >
+                              <span>Total</span>
+                              <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                                {formatCost(total)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }}
                   />
                   {chartModels.length > 1 && (
                     <Legend wrapperStyle={{ fontSize: "11px" }} iconSize={10} />
