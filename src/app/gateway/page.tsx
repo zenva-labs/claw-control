@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getGatewayInfo, getPairedDevices, getActiveSessions } from "@/lib/openclaw";
 import { GatewayPageTabs } from "@/components/gateway-page-tabs";
 
-export const metadata: Metadata = { title: "Gateway" };
+export const metadata: Metadata = { title: "Gateway | Claw Control" };
 export const dynamic = "force-dynamic";
 
 const VALID_TABS = ["overview", "instances", "sessions"] as const;
