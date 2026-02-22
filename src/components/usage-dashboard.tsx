@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
+import { getModelColor } from "@/lib/utils";
 
 type TimeRange = "today" | "week" | "7d" | "30d" | "all";
 
@@ -93,18 +94,6 @@ function shortDate(key: string): string {
   const [, m, d] = key.split("-");
   return `${m}/${d}`;
 }
-
-// Deterministic color palette for chart bars
-const CHART_COLORS = [
-  "var(--color-chart-1, #2563eb)",
-  "var(--color-chart-2, #10b981)",
-  "var(--color-chart-3, #f59e0b)",
-  "var(--color-chart-4, #8b5cf6)",
-  "var(--color-chart-5, #ef4444)",
-  "var(--color-chart-6, #06b6d4)",
-  "var(--color-chart-7, #ec4899)",
-  "var(--color-chart-8, #84cc16)",
-];
 
 export function UsageDashboard({ records }: { records: UsageRecord[] }) {
   const [range, setRange] = useState<TimeRange>("today");
@@ -325,13 +314,13 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
           </CardHeader>
           <CardContent>
             <div className="flex h-6 overflow-hidden rounded-sm">
-              {modelDistribution.map((m, i) => (
+              {modelDistribution.map((m) => (
                 <div
                   key={m.model}
                   className="h-full transition-all"
                   style={{
                     width: `${m.pct}%`,
-                    backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
+                    backgroundColor: getModelColor(m.model),
                     opacity: 0.8,
                   }}
                   title={`${m.model}: ${m.pct.toFixed(1)}%`}
@@ -339,12 +328,12 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
               ))}
             </div>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
-              {modelDistribution.map((m, i) => (
+              {modelDistribution.map((m) => (
                 <div key={m.model} className="flex items-center gap-1.5 text-xs">
                   <div
                     className="size-2.5 shrink-0 rounded-sm"
                     style={{
-                      backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
+                      backgroundColor: getModelColor(m.model),
                       opacity: 0.8,
                     }}
                   />
@@ -386,9 +375,10 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
                     cursor={{ fill: "var(--muted)", opacity: 0.5 }}
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
-                      const sorted = [...payload].sort(
-                        (a, b) => Number(b.value ?? 0) - Number(a.value ?? 0),
-                      );
+                      const sorted = [...payload]
+                        .filter((entry) => Number(entry.value ?? 0) > 0)
+                        .sort((a, b) => Number(b.value ?? 0) - Number(a.value ?? 0));
+                      if (!sorted.length) return null;
                       const total = sorted.reduce(
                         (sum, entry) => sum + Number(entry.value ?? 0),
                         0,
@@ -447,7 +437,7 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
                       key={model}
                       dataKey={model}
                       stackId="cost"
-                      fill={CHART_COLORS[i % CHART_COLORS.length]}
+                      fill={getModelColor(model)}
                       opacity={0.8}
                       isAnimationActive={false}
                       radius={i === chartModels.length - 1 ? [2, 2, 0, 0] : undefined}

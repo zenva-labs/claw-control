@@ -18,10 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Claw Control",
-    template: "%s · Claw Control",
-  },
+  title: "Claw Control",
   description: "Mission Control panel for OpenClaw",
 };
 
