@@ -146,6 +146,42 @@ export interface PairedDevice {
   lastUsedAtMs: number | null;
 }
 
+export interface HeartbeatAgentConfig {
+  agentId: string;
+  agentName: string;
+  enabled: boolean;
+  every: string;
+  everyMs: number | null;
+}
+
+export interface HeartbeatLogEntry {
+  timestamp: string;
+  intervalMs: number;
+  agentId?: string;
+}
+
+export interface HeartbeatSessionInfo {
+  agentId: string;
+  agentName: string;
+  sessionCount: number;
+  activeSessionCount: number;
+  lastActivity: string | null;
+  totalTokens: number;
+  contextTokens: number;
+  percentUsed: number;
+  model: string | null;
+}
+
+export interface HeartbeatStatus {
+  defaultAgentId: string;
+  agents: HeartbeatAgentConfig[];
+  sessions: HeartbeatSessionInfo[];
+  recentHeartbeatEvents: HeartbeatLogEntry[];
+  heartbeatFilePaths: { agentId: string; path: string; exists: boolean }[];
+  lastHeartbeatAt: string | null;
+  gatewayRunning: boolean;
+}
+
 export interface UsageRecord {
   timestamp: number;
   sessionId: string;

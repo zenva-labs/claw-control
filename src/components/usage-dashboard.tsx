@@ -15,6 +15,12 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
 import { getModelColor } from "@/lib/utils";
+import {
+  CoinsIcon,
+  MessageSquareMoreIcon,
+  CalculatorIcon,
+  CircleDollarSignIcon,
+} from "lucide-react";
 
 type TimeRange = "today" | "week" | "7d" | "30d" | "all";
 
@@ -266,7 +272,10 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Card>
           <CardContent>
-            <div className="text-muted-foreground text-sm">Total Cost</div>
+            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <CircleDollarSignIcon className="size-3.5" />
+              Total Cost
+            </div>
             <div className="mt-1 text-2xl font-bold tabular-nums">
               {formatCost(stats.totalCost)}
             </div>
@@ -274,7 +283,10 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
         </Card>
         <Card>
           <CardContent>
-            <div className="text-muted-foreground text-sm">Total Tokens</div>
+            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <CoinsIcon className="size-3.5" />
+              Total Tokens
+            </div>
             <div className="mt-1 text-2xl font-bold tabular-nums">
               {formatTokens(stats.totalTokens)}
             </div>
@@ -282,7 +294,10 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
         </Card>
         <Card>
           <CardContent>
-            <div className="text-muted-foreground text-sm">Sessions</div>
+            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <MessageSquareMoreIcon className="size-3.5" />
+              Sessions
+            </div>
             <div className="mt-1 text-2xl font-bold tabular-nums">
               {stats.sessionCount.toLocaleString()}
             </div>
@@ -290,7 +305,10 @@ export function UsageDashboard({ records }: { records: UsageRecord[] }) {
         </Card>
         <Card>
           <CardContent>
-            <div className="text-muted-foreground text-sm">Avg Cost / Session</div>
+            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <CalculatorIcon className="size-3.5" />
+              Avg Cost / Session
+            </div>
             <div className="mt-1 text-2xl font-bold tabular-nums">
               {formatCost(stats.avgCostPerSession)}
             </div>

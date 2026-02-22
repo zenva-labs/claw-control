@@ -20,7 +20,7 @@ export default function DashboardPage() {
       <PageBreadcrumb page="Agents" />
       <h1 className="mb-1 text-2xl font-semibold tracking-tight">Agents</h1>
       <p className="text-muted-foreground mb-3 text-sm">
-        {agents.length} agent{agents.length !== 1 && "s"} configured
+        {agents.length} agent{agents.length !== 1 && "s"} configured.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

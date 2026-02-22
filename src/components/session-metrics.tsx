@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { CoinsIcon, MessageSquareMoreIcon, WrenchIcon, CircleDollarSignIcon } from "lucide-react";
 
 function BarRow({
   label,
@@ -106,9 +107,25 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {stats.totalCost > 0 && (
+          <Card>
+            <CardContent>
+              <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+                <CircleDollarSignIcon className="size-3.5" />
+                Total Cost
+              </div>
+              <div className="mt-1 text-2xl font-bold tabular-nums">
+                ${stats.totalCost.toFixed(4)}
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardContent>
-            <div className="text-muted-foreground text-sm">Total Tokens</div>
+            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <CoinsIcon className="size-3.5" />
+              Total Tokens
+            </div>
             <div className="mt-1 text-2xl font-bold tabular-nums">
               {stats.totalTokens.toLocaleString()}
             </div>
@@ -116,7 +133,10 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
         </Card>
         <Card>
           <CardContent>
-            <div className="text-muted-foreground text-sm">Messages</div>
+            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <MessageSquareMoreIcon className="size-3.5" />
+              Messages
+            </div>
             <div className="mt-1 text-2xl font-bold tabular-nums">
               {stats.totalMessages.toLocaleString()}
             </div>
@@ -124,22 +144,15 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
         </Card>
         <Card>
           <CardContent>
-            <div className="text-muted-foreground text-sm">Tool Calls</div>
+            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+              <WrenchIcon className="size-3.5" />
+              Tool Calls
+            </div>
             <div className="mt-1 text-2xl font-bold tabular-nums">
               {stats.toolCalls.toLocaleString()}
             </div>
           </CardContent>
         </Card>
-        {stats.totalCost > 0 && (
-          <Card>
-            <CardContent>
-              <div className="text-muted-foreground text-sm">Total Cost</div>
-              <div className="mt-1 text-2xl font-bold tabular-nums">
-                ${stats.totalCost.toFixed(4)}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">

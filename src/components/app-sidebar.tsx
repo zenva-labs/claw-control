@@ -7,6 +7,7 @@ import {
   BarChart3Icon,
   ClockIcon,
   ExternalLinkIcon,
+  HeartPulseIcon,
   MessageSquareMoreIcon,
   RadioIcon,
   ScrollTextIcon,
@@ -40,8 +41,9 @@ const navGroups = [
   {
     label: "Platform",
     items: [
-      { href: "/gateway", label: "Gateway", icon: RadioIcon },
       { href: "/usage", label: "Usage", icon: BarChart3Icon },
+      { href: "/gateway", label: "Gateway", icon: RadioIcon },
+      { href: "/heartbeats", label: "Heartbeats", icon: HeartPulseIcon },
       { href: "/channels", label: "Channels", icon: CableIcon },
       { href: "/logs", label: "Logs", icon: ScrollTextIcon },
     ],

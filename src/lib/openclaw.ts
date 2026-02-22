@@ -6,6 +6,8 @@ import type {
   CronJob,
   CronRun,
   GatewayInfo,
+  HeartbeatStatus,
+  HeartbeatLogEntry,
   PairedDevice,
   SessionSummary,
   ParsedSession,
@@ -651,4 +653,190 @@ export function getAllSessions(): (SessionSummary & { agentName: string })[] {
     }
   }
   return all.sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime());
+}
+
+function parseHeartbeatInterval(value: unknown): { every: string; everyMs: number | null } {
+  if (value === false || value === "disabled" || value === "off") {
+    return { every: "disabled", everyMs: null };
+  }
+  if (typeof value === "number") {
+    return { every: `${value}ms`, everyMs: value };
+  }
+  if (typeof value === "string") {
+    const match = value.match(/^(\d+)(ms|s|m|h)$/);
+    if (match) {
+      const n = parseInt(match[1], 10);
+      const unit = match[2];
+      const multipliers: Record<string, number> = { ms: 1, s: 1000, m: 60000, h: 3600000 };
+      return { every: value, everyMs: n * (multipliers[unit] || 1) };
+    }
+    return { every: value, everyMs: null };
+  }
+  return { every: "disabled", everyMs: null };
+}
+
+function getHeartbeatLogEvents(): HeartbeatLogEntry[] {
+  const entries: HeartbeatLogEntry[] = [];
+  const logsDir = "/tmp/openclaw";
+
+  try {
+    if (!fs.existsSync(logsDir)) return entries;
+    const files = fs
+      .readdirSync(logsDir)
+      .filter((f) => f.endsWith(".log"))
+      .sort()
+      .reverse();
+
+    for (const file of files.slice(0, 3)) {
+      try {
+        const content = fs.readFileSync(path.join(logsDir, file), "utf-8");
+        for (const line of content.split("\n")) {
+          if (!line.includes("heartbeat")) continue;
+          try {
+            const obj = JSON.parse(line);
+            const subsystem = typeof obj["0"] === "string" ? obj["0"] : "";
+            if (!subsystem.includes("gateway/heartbeat")) continue;
+            const meta = obj["1"];
+            entries.push({
+              timestamp: obj.time || obj._meta?.date || "",
+              intervalMs: meta?.intervalMs ?? 0,
+              agentId: meta?.agentId,
+            });
+          } catch {
+            /* skip */
+          }
+        }
+      } catch {
+        /* skip */
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+}
+
+export function getHeartbeatStatus(): HeartbeatStatus {
+  const configPath = path.join(OPENCLAW_DIR, "openclaw.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  const agents = getAgents();
+
+  const defaults = config.agents?.defaults || {};
+  const defaultHeartbeat = defaults.heartbeat || {};
+  const defaultEvery = defaultHeartbeat.every ?? "30m";
+
+  const defaultAgent = agents.find((a) => a.default) || agents[0];
+  const defaultAgentId = defaultAgent?.id || "main";
+
+  const heartbeatAgents = agents.map((agent) => {
+    const agentConfig = (config.agents?.list || []).find(
+      (a: Record<string, unknown>) => a.id === agent.id,
+    );
+    const agentHb = agentConfig?.heartbeat;
+
+    let enabled: boolean;
+    let interval: { every: string; everyMs: number | null };
+
+    if (agentHb !== undefined) {
+      if (agentHb === false || agentHb?.enabled === false) {
+        enabled = false;
+        interval = { every: "disabled", everyMs: null };
+      } else {
+        enabled = true;
+        interval = parseHeartbeatInterval(agentHb?.every ?? agentHb);
+      }
+    } else if (agent.default) {
+      enabled = defaultEvery !== "disabled" && defaultEvery !== false;
+      interval = parseHeartbeatInterval(defaultEvery);
+    } else {
+      enabled = false;
+      interval = { every: "disabled", everyMs: null };
+    }
+
+    return {
+      agentId: agent.id,
+      agentName: agent.name,
+      enabled,
+      ...interval,
+    };
+  });
+
+  const sessions = agents.map((agent) => {
+    const sessionsPath = path.join(OPENCLAW_DIR, "agents", agent.id, "sessions", "sessions.json");
+    let sessionCount = 0;
+    let activeCount = 0;
+    let totalTokens = 0;
+    let contextTokens = 0;
+    let model: string | null = null;
+    let lastActivity: string | null = null;
+
+    try {
+      if (fs.existsSync(sessionsPath)) {
+        const data = JSON.parse(fs.readFileSync(sessionsPath, "utf-8"));
+        const entries = Object.values(data) as Record<string, unknown>[];
+        sessionCount = entries.length;
+
+        for (const entry of entries) {
+          const updatedAt = entry.updatedAt as number | undefined;
+          if (updatedAt) {
+            activeCount++;
+            const ts = new Date(updatedAt).toISOString();
+            if (!lastActivity || ts > lastActivity) lastActivity = ts;
+          }
+          totalTokens += (entry.totalTokens as number) || 0;
+          contextTokens = Math.max(contextTokens, (entry.contextTokens as number) || 0);
+          if (entry.model) model = entry.model as string;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+
+    return {
+      agentId: agent.id,
+      agentName: agent.name,
+      sessionCount,
+      activeSessionCount: activeCount,
+      lastActivity,
+      totalTokens,
+      contextTokens,
+      percentUsed: contextTokens > 0 ? Math.round((totalTokens / contextTokens) * 100) : 0,
+      model,
+    };
+  });
+
+  const heartbeatFilePaths = agents.map((agent) => {
+    const workspace = agent.workspace;
+    const hbPath = workspace ? path.join(workspace, "HEARTBEAT.md") : null;
+    return {
+      agentId: agent.id,
+      path: hbPath || "(no workspace)",
+      exists: hbPath ? fs.existsSync(hbPath) : false,
+    };
+  });
+
+  const recentEvents = getHeartbeatLogEvents().slice(0, 20);
+  const lastHeartbeatAt = recentEvents.length > 0 ? recentEvents[0].timestamp : null;
+
+  let gatewayRunning = false;
+  try {
+    const logPath = path.join(OPENCLAW_DIR, "logs", "gateway.log");
+    if (fs.existsSync(logPath)) {
+      const stat = fs.statSync(logPath);
+      gatewayRunning = Date.now() - stat.mtime.getTime() < 60_000;
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return {
+    defaultAgentId,
+    agents: heartbeatAgents,
+    sessions,
+    recentHeartbeatEvents: recentEvents,
+    heartbeatFilePaths,
+    lastHeartbeatAt,
+    gatewayRunning,
+  };
 }
