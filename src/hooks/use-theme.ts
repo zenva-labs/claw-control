@@ -10,6 +10,7 @@ export function useTheme() {
   useEffect(() => {
     const saved = localStorage.getItem("theme") as Theme | null;
     if (saved === "dark" || saved === "light" || saved === "system") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeState(saved);
     }
   }, []);
