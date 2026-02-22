@@ -101,7 +101,10 @@ export function SessionDetails({
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/agents/${agentId}/sessions/${sessionId}`} className="font-mono text-xs">
+              <BreadcrumbLink
+                href={`/agents/${agentId}/sessions/${sessionId}`}
+                className="font-mono text-xs"
+              >
                 {sessionId.slice(0, 8)}...
               </BreadcrumbLink>
             </BreadcrumbItem>
