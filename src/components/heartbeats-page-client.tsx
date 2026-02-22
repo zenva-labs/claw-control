@@ -89,15 +89,7 @@ export function HeartbeatsPageClient({
       <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
         {status.agents.map((agent) => {
           const hbFile = status.heartbeatFilePaths.find((f) => f.agentId === agent.agentId);
-          const isDefault = agent.agentId === status.defaultAgentId;
-          return (
-            <AgentHeartbeatCard
-              key={agent.agentId}
-              agent={agent}
-              heartbeatFile={hbFile}
-              isDefault={isDefault}
-            />
-          );
+          return <AgentHeartbeatCard key={agent.agentId} agent={agent} heartbeatFile={hbFile} />;
         })}
       </div>
 
@@ -137,11 +129,9 @@ function SummaryCard({
 function AgentHeartbeatCard({
   agent,
   heartbeatFile,
-  isDefault,
 }: {
   agent: HeartbeatStatus["agents"][number];
   heartbeatFile?: HeartbeatStatus["heartbeatFilePaths"][number];
-  isDefault: boolean;
 }) {
   return (
     <Card>
