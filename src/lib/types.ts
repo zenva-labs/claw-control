@@ -20,6 +20,8 @@ export interface SessionSummary {
   messageCount: number;
   totalCost: number;
   lastUserMessage?: string;
+  totalTokens?: number;
+  contextTokens?: number;
 }
 
 export interface ContentBlock {
@@ -57,6 +59,8 @@ export interface ParsedSession {
   model?: string;
   provider?: string;
   messages: SessionMessage[];
+  totalTokens?: number;
+  contextTokens?: number;
 }
 
 export interface CronSchedule {

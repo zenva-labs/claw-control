@@ -35,6 +35,8 @@ type SessionRow = {
   totalCost: number;
   startedAt?: string;
   lastUserMessage?: string;
+  totalTokens?: number;
+  contextTokens?: number;
 };
 
 type SessionCounts = { active: number; archived: number; total: number };

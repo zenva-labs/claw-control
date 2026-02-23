@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { statusVariant, getStatusLabel } from "@/lib/session-utils";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 type SessionRow = {
@@ -25,9 +26,11 @@ type SessionRow = {
   totalCost: number;
   startedAt?: string;
   lastUserMessage?: string;
+  totalTokens?: number;
+  contextTokens?: number;
 };
 
-type SortKey = "agent" | "status" | "started" | "cost";
+type SortKey = "agent" | "status" | "started" | "cost" | "context";
 type SortDir = "asc" | "desc";
 
 function formatDate(iso: string | undefined): string {
@@ -83,6 +86,11 @@ export function SessionsTable({
         }
         case "cost":
           return dir * (a.totalCost - b.totalCost);
+        case "context": {
+          const pctA = a.contextTokens ? (a.totalTokens ?? 0) / a.contextTokens : 0;
+          const pctB = b.contextTokens ? (b.totalTokens ?? 0) / b.contextTokens : 0;
+          return dir * (pctA - pctB);
+        }
         default:
           return 0;
       }
@@ -119,6 +127,7 @@ export function SessionsTable({
             <TableHead className="w-[80px]">{headerButton("status", "Status")}</TableHead>
             <TableHead className="w-[90px] text-right">Messages</TableHead>
             <TableHead className="w-[100px]">{headerButton("cost", "Cost", "ml-auto")}</TableHead>
+            <TableHead className="w-[160px]">{headerButton("context", "Context")}</TableHead>
             <TableHead className="w-[180px]">{headerButton("started", "Started")}</TableHead>
             <TableHead>Preview</TableHead>
           </TableRow>
@@ -155,6 +164,12 @@ export function SessionsTable({
               <TableCell className="text-muted-foreground text-right text-sm tabular-nums">
                 {session.totalCost > 0 ? `$${session.totalCost.toFixed(4)}` : "—"}
               </TableCell>
+              <TableCell>
+                <ContextUsageCell
+                  totalTokens={session.totalTokens}
+                  contextTokens={session.contextTokens}
+                />
+              </TableCell>
               <TableCell className="text-muted-foreground text-xs">
                 {formatDate(session.startedAt)}
               </TableCell>
@@ -165,6 +180,32 @@ export function SessionsTable({
           ))}
         </TableBody>
       </Table>
+    </div>
+  );
+}
+
+function ContextUsageCell({
+  totalTokens,
+  contextTokens,
+}: {
+  totalTokens?: number;
+  contextTokens?: number;
+}) {
+  if (!contextTokens) return <span className="text-muted-foreground text-xs">—</span>;
+  const used = totalTokens ?? 0;
+  const pct = Math.round((used / contextTokens) * 100);
+  const barColor =
+    pct >= 80 ? "bg-red-500/70" : pct >= 50 ? "bg-amber-500/70" : "bg-emerald-500/70";
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="bg-muted/50 h-2 w-16 overflow-hidden rounded-full">
+        <div
+          className={cn("h-full rounded-full transition-all", barColor)}
+          style={{ width: `${Math.min(pct, 100)}%` }}
+        />
+      </div>
+      <span className="text-muted-foreground text-xs tabular-nums">{pct}%</span>
     </div>
   );
 }

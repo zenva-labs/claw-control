@@ -20,6 +20,30 @@ import type {
 
 const OPENCLAW_DIR = process.env.OPENCLAW_DIR || path.join(os.homedir(), ".openclaw");
 
+function getSessionContextMap(
+  agentId: string,
+): Map<string, { totalTokens: number; contextTokens: number }> {
+  const map = new Map<string, { totalTokens: number; contextTokens: number }>();
+  try {
+    const sessionsJsonPath = path.join(OPENCLAW_DIR, "agents", agentId, "sessions", "sessions.json");
+    if (fs.existsSync(sessionsJsonPath)) {
+      const data = JSON.parse(fs.readFileSync(sessionsJsonPath, "utf-8"));
+      for (const entry of Object.values(data) as Record<string, unknown>[]) {
+        const sid = entry.sessionId as string | undefined;
+        if (sid) {
+          map.set(sid, {
+            totalTokens: (entry.totalTokens as number) || 0,
+            contextTokens: (entry.contextTokens as number) || 0,
+          });
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return map;
+}
+
 export function getAgents(): AgentConfig[] {
   const configPath = path.join(OPENCLAW_DIR, "openclaw.json");
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
@@ -190,6 +214,7 @@ export function getSessionsForAgent(agentId: string): SessionSummary[] {
   const sessionsDir = path.join(OPENCLAW_DIR, "agents", agentId, "sessions");
   if (!fs.existsSync(sessionsDir)) return [];
 
+  const contextMap = getSessionContextMap(agentId);
   const files = fs.readdirSync(sessionsDir);
   const sessions: SessionSummary[] = [];
 
@@ -237,6 +262,7 @@ export function getSessionsForAgent(agentId: string): SessionSummary[] {
       /* skip unreadable files */
     }
 
+    const ctx = contextMap.get(parsed.id);
     sessions.push({
       id: parsed.id,
       agentId,
@@ -248,6 +274,8 @@ export function getSessionsForAgent(agentId: string): SessionSummary[] {
       messageCount,
       totalCost,
       lastUserMessage,
+      totalTokens: ctx?.totalTokens,
+      contextTokens: ctx?.contextTokens,
     });
   }
 
@@ -385,7 +413,19 @@ export function getSession(agentId: string, sessionId: string): ParsedSession | 
     }
   }
 
-  return { id: sessionId_, status, startedAt, model, provider, messages };
+  const contextMap = getSessionContextMap(agentId);
+  const ctx = contextMap.get(sessionId);
+
+  return {
+    id: sessionId_,
+    status,
+    startedAt,
+    model,
+    provider,
+    messages,
+    totalTokens: ctx?.totalTokens,
+    contextTokens: ctx?.contextTokens,
+  };
 }
 
 export function getAgentSessionCounts(): Record<

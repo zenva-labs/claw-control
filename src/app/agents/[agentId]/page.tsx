@@ -52,6 +52,8 @@ export default async function AgentPage({
     totalCost: s.totalCost,
     startedAt: s.startedAt,
     lastUserMessage: s.lastUserMessage,
+    totalTokens: s.totalTokens,
+    contextTokens: s.contextTokens,
   }));
 
   const active = sessions.filter((s) => s.status === "active").length;

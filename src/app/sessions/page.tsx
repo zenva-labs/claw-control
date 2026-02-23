@@ -22,6 +22,8 @@ export default function AllSessionsPage() {
     totalCost: s.totalCost,
     startedAt: s.startedAt,
     lastUserMessage: s.lastUserMessage,
+    totalTokens: s.totalTokens,
+    contextTokens: s.contextTokens,
   }));
 
   return (

@@ -167,7 +167,11 @@ export function SessionDetails({
 
       <NavTabsContent value="metrics">
         <Container>
-          <SessionMetrics messages={session.messages} />
+          <SessionMetrics
+            messages={session.messages}
+            totalTokens={session.totalTokens}
+            contextTokens={session.contextTokens}
+          />
         </Container>
       </NavTabsContent>
     </NavTabs>

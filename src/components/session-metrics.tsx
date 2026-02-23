@@ -12,7 +12,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { CoinsIcon, MessageSquareMoreIcon, WrenchIcon, CircleDollarSignIcon } from "lucide-react";
+import {
+  CoinsIcon,
+  MessageSquareMoreIcon,
+  WrenchIcon,
+  CircleDollarSignIcon,
+  GaugeIcon,
+} from "lucide-react";
 
 function BarRow({
   label,
@@ -42,7 +48,15 @@ function BarRow({
   );
 }
 
-export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
+export function SessionMetrics({
+  messages,
+  totalTokens: contextTotalTokens,
+  contextTokens,
+}: {
+  messages: SessionMessage[];
+  totalTokens?: number;
+  contextTokens?: number;
+}) {
   const stats = useMemo(() => {
     let inputTokens = 0;
     let outputTokens = 0;
@@ -103,6 +117,9 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
   const tokenMax = Math.max(stats.inputTokens, stats.outputTokens, stats.cachedTokens);
   const msgMax = Math.max(stats.userMessages, stats.assistantMessages, stats.systemMessages);
   const toolMax = stats.toolBreakdown[0]?.count ?? 0;
+  const contextPct = contextTokens
+    ? Math.round(((contextTotalTokens ?? 0) / contextTokens) * 100)
+    : null;
 
   return (
     <div className="space-y-3">
@@ -154,6 +171,48 @@ export function SessionMetrics({ messages }: { messages: SessionMessage[] }) {
           </CardContent>
         </Card>
       </div>
+
+      {contextPct !== null && (
+        <Card>
+          <CardContent>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+                  <GaugeIcon className="size-3.5" />
+                  Context Window Usage
+                </div>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <span
+                    className={cn(
+                      "text-2xl font-bold tabular-nums",
+                      contextPct >= 80 ? "text-red-500" : contextPct >= 50 ? "text-amber-500" : "",
+                    )}
+                  >
+                    {contextPct}%
+                  </span>
+                  <span className="text-muted-foreground text-sm tabular-nums">
+                    {(contextTotalTokens ?? 0).toLocaleString()} / {contextTokens!.toLocaleString()}{" "}
+                    tokens
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="bg-muted/50 mt-3 h-3 overflow-hidden rounded-full">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  contextPct >= 80
+                    ? "bg-red-500/70"
+                    : contextPct >= 50
+                      ? "bg-amber-500/70"
+                      : "bg-emerald-500/70",
+                )}
+                style={{ width: `${Math.min(contextPct, 100)}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Card>
