@@ -8,9 +8,26 @@ const LOGS_DIR = "/tmp/openclaw";
 
 const ANSI_RE = /\u001b\[[0-9;]*m/g;
 
-function getTodayLogFile(): string {
-  const date = new Date().toISOString().slice(0, 10);
-  return path.join(LOGS_DIR, `openclaw-${date}.log`);
+function getLatestLogFile(): string | null {
+  try {
+    const files = fs
+      .readdirSync(LOGS_DIR)
+      .filter((f) => f.startsWith("openclaw-") && f.endsWith(".log"));
+    if (files.length === 0) return null;
+
+    let latest = files[0];
+    let latestMtime = fs.statSync(path.join(LOGS_DIR, latest)).mtimeMs;
+    for (let i = 1; i < files.length; i++) {
+      const mtime = fs.statSync(path.join(LOGS_DIR, files[i])).mtimeMs;
+      if (mtime > latestMtime) {
+        latest = files[i];
+        latestMtime = mtime;
+      }
+    }
+    return path.join(LOGS_DIR, latest);
+  } catch {
+    return null;
+  }
 }
 
 interface ParsedLogEntry {
@@ -81,17 +98,19 @@ function readTailEntries(
 }
 
 export async function GET(request: NextRequest) {
-  const logFile = getTodayLogFile();
+  const logFile = getLatestLogFile();
 
   const encoder = new TextEncoder();
-  const { entries: initialEntries, byteOffset: initialOffset } = readTailEntries(logFile, 500);
+  const { entries: initialEntries, byteOffset: initialOffset } = logFile
+    ? readTailEntries(logFile, 500)
+    : { entries: [] as ParsedLogEntry[], byteOffset: 0 };
   let offset = initialOffset;
   let currentFile = logFile;
 
   const stream = new ReadableStream({
     start(controller) {
       controller.enqueue(
-        encoder.encode(`event: meta\ndata: ${JSON.stringify({ file: logFile })}\n\n`),
+        encoder.encode(`event: meta\ndata: ${JSON.stringify({ file: logFile ?? LOGS_DIR })}\n\n`),
       );
       if (initialEntries.length > 0) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(initialEntries)}\n\n`));
@@ -103,11 +122,17 @@ export async function GET(request: NextRequest) {
       const sendNewContent = () => {
         if (closed) return;
 
-        const todayFile = getTodayLogFile();
-        if (todayFile !== currentFile) {
-          currentFile = todayFile;
+        const latestFile = getLatestLogFile();
+        if (latestFile && latestFile !== currentFile) {
+          currentFile = latestFile;
           offset = 0;
+          startWatcher();
+          controller.enqueue(
+            encoder.encode(`event: meta\ndata: ${JSON.stringify({ file: currentFile })}\n\n`),
+          );
         }
+
+        if (!currentFile) return;
 
         try {
           const stat = fs.statSync(currentFile);
@@ -131,7 +156,7 @@ export async function GET(request: NextRequest) {
             }
           }
         } catch {
-          // File may not exist yet today
+          // File may not exist yet
         }
       };
 
@@ -139,6 +164,7 @@ export async function GET(request: NextRequest) {
       const startWatcher = () => {
         try {
           watcher?.close();
+          if (!currentFile) return;
           watcher = fs.watch(currentFile, { persistent: false }, () => {
             if (closed) return;
             if (debounceTimer) clearTimeout(debounceTimer);
@@ -150,15 +176,10 @@ export async function GET(request: NextRequest) {
       };
       startWatcher();
 
-      // Check for date rollover and re-watch
+      // Periodically check for a newer log file
       const rolloverCheck = setInterval(() => {
         if (closed) return;
-        const todayFile = getTodayLogFile();
-        if (todayFile !== currentFile) {
-          currentFile = todayFile;
-          offset = 0;
-          startWatcher();
-        }
+        sendNewContent();
       }, 30000);
 
       const heartbeat = setInterval(() => {
