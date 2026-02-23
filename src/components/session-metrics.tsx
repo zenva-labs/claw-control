@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import {
   CoinsIcon,
@@ -121,6 +122,15 @@ export function SessionMetrics({
     ? Math.round(((contextTotalTokens ?? 0) / contextTokens) * 100)
     : null;
 
+  const contextVariant =
+    contextPct !== null
+      ? contextPct >= 90
+        ? "danger"
+        : contextPct >= 70
+          ? "warn"
+          : "success"
+      : "info";
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -197,19 +207,11 @@ export function SessionMetrics({
                 </div>
               </div>
             </div>
-            <div className="bg-muted/50 mt-3 h-3 overflow-hidden rounded-full">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all",
-                  contextPct >= 80
-                    ? "bg-red-500/70"
-                    : contextPct >= 50
-                      ? "bg-amber-500/70"
-                      : "bg-emerald-500/70",
-                )}
-                style={{ width: `${Math.min(contextPct, 100)}%` }}
-              />
-            </div>
+            <Progress
+              value={Math.min(contextPct, 100)}
+              variant={contextVariant}
+              className="bg-muted/50 mt-1 h-3"
+            />
           </CardContent>
         </Card>
       )}

@@ -25,7 +25,13 @@ function getSessionContextMap(
 ): Map<string, { totalTokens: number; contextTokens: number }> {
   const map = new Map<string, { totalTokens: number; contextTokens: number }>();
   try {
-    const sessionsJsonPath = path.join(OPENCLAW_DIR, "agents", agentId, "sessions", "sessions.json");
+    const sessionsJsonPath = path.join(
+      OPENCLAW_DIR,
+      "agents",
+      agentId,
+      "sessions",
+      "sessions.json",
+    );
     if (fs.existsSync(sessionsJsonPath)) {
       const data = JSON.parse(fs.readFileSync(sessionsJsonPath, "utf-8"));
       for (const entry of Object.values(data) as Record<string, unknown>[]) {

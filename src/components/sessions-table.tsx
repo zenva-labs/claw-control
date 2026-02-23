@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { statusVariant, getStatusLabel } from "@/lib/session-utils";
-import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
 
 type SessionRow = {
@@ -120,13 +120,13 @@ export function SessionsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[160px]">Session</TableHead>
+            <TableHead className="w-[120px]">Session</TableHead>
             {showAgent && (
               <TableHead className="w-[140px]">{headerButton("agent", "Agent")}</TableHead>
             )}
             <TableHead className="w-[80px]">{headerButton("status", "Status")}</TableHead>
             <TableHead className="w-[90px] text-right">Messages</TableHead>
-            <TableHead className="w-[100px]">{headerButton("cost", "Cost", "ml-auto")}</TableHead>
+            <TableHead className="w-[150px]">{headerButton("cost", "Cost", "ml-auto")}</TableHead>
             <TableHead className="w-[160px]">{headerButton("context", "Context")}</TableHead>
             <TableHead className="w-[180px]">{headerButton("started", "Started")}</TableHead>
             <TableHead>Preview</TableHead>
@@ -194,17 +194,11 @@ function ContextUsageCell({
   if (!contextTokens) return <span className="text-muted-foreground text-xs">—</span>;
   const used = totalTokens ?? 0;
   const pct = Math.round((used / contextTokens) * 100);
-  const barColor =
-    pct >= 80 ? "bg-red-500/70" : pct >= 50 ? "bg-amber-500/70" : "bg-emerald-500/70";
+  const variant = pct >= 90 ? "danger" : pct >= 70 ? "warn" : "success";
 
   return (
     <div className="flex items-center gap-2">
-      <div className="bg-muted/50 h-2 w-16 overflow-hidden rounded-full">
-        <div
-          className={cn("h-full rounded-full transition-all", barColor)}
-          style={{ width: `${Math.min(pct, 100)}%` }}
-        />
-      </div>
+      <Progress value={Math.min(pct, 100)} variant={variant} className="h-2" />
       <span className="text-muted-foreground text-xs tabular-nums">{pct}%</span>
     </div>
   );
