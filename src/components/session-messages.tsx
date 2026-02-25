@@ -167,7 +167,13 @@ function AssistantBubble({
   );
 }
 
-export function SessionMessages({ agentName, messages }: { agentName: string; messages: SessionMessage[] }) {
+export function SessionMessages({
+  agentName,
+  messages,
+}: {
+  agentName: string;
+  messages: SessionMessage[];
+}) {
   const toolResults = new Map<string, ContentBlock>();
   for (const msg of messages) {
     if (msg.role === "toolResult" && msg.toolCallId) {
@@ -189,7 +195,12 @@ export function SessionMessages({ agentName, messages }: { agentName: string; me
         msg.role === "user" ? (
           <UserBubble key={msg.id} message={msg} />
         ) : (
-          <AssistantBubble key={msg.id} agentName={agentName} message={msg} toolResults={toolResults} />
+          <AssistantBubble
+            key={msg.id}
+            agentName={agentName}
+            message={msg}
+            toolResults={toolResults}
+          />
         ),
       )}
     </div>

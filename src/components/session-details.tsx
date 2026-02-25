@@ -119,7 +119,9 @@ export function SessionDetails({
         <Container>
           <div className="mt-1 mb-1 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-xl font-semibold tracking-tight">{agentName} &middot; {format(new Date(session.startedAt), "MMM d, yyyy, h:mm a")}</h1>
+              <h1 className="text-xl font-semibold tracking-tight">
+                {agentName} &middot; {format(new Date(session.startedAt), "MMM d, yyyy, h:mm a")}
+              </h1>
             </div>
             <div className="flex items-center gap-1">
               {session.model && (
@@ -133,10 +135,7 @@ export function SessionDetails({
             </div>
           </div>
 
-          <div className="text-muted-foreground mb-2 text-xs font-mono">
-            {sessionId}
-          </div>
-  
+          <div className="text-muted-foreground mb-2 font-mono text-xs">{sessionId}</div>
 
           <div className="flex items-center justify-between gap-2">
             <NavTabsList className="mb-0.5">
