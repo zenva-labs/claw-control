@@ -112,16 +112,18 @@ function UserBubble({ message }: { message: SessionMessage }) {
 }
 
 function AssistantBubble({
+  agentName,
   message,
   toolResults,
 }: {
+  agentName: string;
   message: SessionMessage;
   toolResults: Map<string, ContentBlock>;
 }) {
   return (
     <div className="border-muted-foreground/40 border-l-2 py-2 pl-4">
       <div className="mb-1 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium">Assistant</span>
+        <span className="text-xs font-medium">{agentName}</span>
         {message.model && (
           <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
             {message.model}
@@ -165,7 +167,7 @@ function AssistantBubble({
   );
 }
 
-export function SessionMessages({ messages }: { messages: SessionMessage[] }) {
+export function SessionMessages({ agentName, messages }: { agentName: string; messages: SessionMessage[] }) {
   const toolResults = new Map<string, ContentBlock>();
   for (const msg of messages) {
     if (msg.role === "toolResult" && msg.toolCallId) {
@@ -187,7 +189,7 @@ export function SessionMessages({ messages }: { messages: SessionMessage[] }) {
         msg.role === "user" ? (
           <UserBubble key={msg.id} message={msg} />
         ) : (
-          <AssistantBubble key={msg.id} message={msg} toolResults={toolResults} />
+          <AssistantBubble key={msg.id} agentName={agentName} message={msg} toolResults={toolResults} />
         ),
       )}
     </div>

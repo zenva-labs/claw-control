@@ -119,7 +119,7 @@ export function SessionDetails({
         <Container>
           <div className="mt-1 mb-1 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="font-mono text-xl font-semibold tracking-tight">{sessionId}</h1>
+              <h1 className="text-xl font-semibold tracking-tight">{agentName} &middot; {format(new Date(session.startedAt), "MMM d, yyyy, h:mm a")}</h1>
             </div>
             <div className="flex items-center gap-1">
               {session.model && (
@@ -133,11 +133,10 @@ export function SessionDetails({
             </div>
           </div>
 
-          <div className="text-muted-foreground mb-2 flex flex-wrap gap-4 text-xs">
-            {session.startedAt && (
-              <span>Started {format(new Date(session.startedAt), "MMM d, yyyy, h:mm a")}</span>
-            )}
+          <div className="text-muted-foreground mb-2 text-xs font-mono">
+            {sessionId}
           </div>
+  
 
           <div className="flex items-center justify-between gap-2">
             <NavTabsList className="mb-0.5">
@@ -161,7 +160,7 @@ export function SessionDetails({
 
       <NavTabsContent value="chat">
         <Container>
-          <SessionChat messages={session.messages} />
+          <SessionChat agentName={agentName} messages={session.messages} />
         </Container>
       </NavTabsContent>
 
