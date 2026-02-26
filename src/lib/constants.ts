@@ -12,4 +12,4 @@ export const USAGE_REFRESH_OPTIONS = [
   { label: "15 minutes", value: 900_000 },
 ] as const;
 
-export const DEFAULT_USAGE_REFRESH_INTERVAL = 30_000;
+export const DEFAULT_USAGE_REFRESH_INTERVAL = 5_000;
