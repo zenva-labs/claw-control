@@ -25,6 +25,82 @@ function resolveHomePath(value: string): string {
   return value;
 }
 
+function getOpenclawPackageDir(): string | null {
+  const candidates = new Set<string>([
+    path.resolve(path.dirname(process.execPath), "..", "lib", "node_modules", "openclaw"),
+  ]);
+
+  for (const dir of (process.env.PATH ?? "").split(path.delimiter).filter(Boolean)) {
+    const binaryPath = path.join(dir, "openclaw");
+    try {
+      if (!fs.existsSync(binaryPath)) continue;
+      const realPath = fs.realpathSync(binaryPath);
+      if (realPath.endsWith("openclaw.mjs")) {
+        candidates.add(path.dirname(realPath));
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(path.join(candidate, "skills"))) return candidate;
+    } catch {
+      /* ignore */
+    }
+  }
+  return null;
+}
+
+const OPENCLAW_PACKAGE_DIR = getOpenclawPackageDir();
+
+function resolveSkillFilePath(
+  skillName: string,
+  workspace: string | undefined,
+  existingFilePath?: string,
+): string | undefined {
+  const candidates = [
+    existingFilePath,
+    workspace ? path.join(workspace, "skills", skillName, "SKILL.md") : undefined,
+    path.join(OPENCLAW_DIR, "skills", skillName, "SKILL.md"),
+    OPENCLAW_PACKAGE_DIR
+      ? path.join(OPENCLAW_PACKAGE_DIR, "skills", skillName, "SKILL.md")
+      : undefined,
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      if (fs.existsSync(candidate)) return candidate;
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return undefined;
+}
+
+function stripMarkdownFrontmatter(content: string): string {
+  const normalized = content.replace(/^\uFEFF/, "");
+  const frontmatterMatch = normalized.match(/^---\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)\r?\n?/);
+  if (!frontmatterMatch) return normalized;
+  return normalized.slice(frontmatterMatch[0].length);
+}
+
+function readFileUtf8IfExists(filePath: string | undefined): string | undefined {
+  if (!filePath) return undefined;
+  try {
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, "utf-8");
+      return stripMarkdownFrontmatter(content);
+    }
+  } catch {
+    /* ignore */
+  }
+  return undefined;
+}
+
 function getSessionContextMap(
   agentId: string,
 ): Map<string, { totalTokens: number; contextTokens: number }> {
@@ -114,7 +190,10 @@ export function getSkillsForAgent(agentId: string): ResolvedSkill[] {
 
       let latest: SkillsEntry | null = null;
       for (const entry of Object.values(data) as SkillsEntry[]) {
-        if (entry.updatedAt && (!latest || !latest.updatedAt || entry.updatedAt > latest.updatedAt)) {
+        if (
+          entry.updatedAt &&
+          (!latest || !latest.updatedAt || entry.updatedAt > latest.updatedAt)
+        ) {
           latest = entry;
         }
       }
@@ -143,10 +222,11 @@ export function getSkillsForAgent(agentId: string): ResolvedSkill[] {
       continue;
     }
 
-    const workspaceSkillPath = configuredWorkspace
-      ? path.join(configuredWorkspace, "skills", name, "SKILL.md")
-      : undefined;
-    const isWorkspaceSkill = workspaceSkillPath ? fs.existsSync(workspaceSkillPath) : false;
+    const skillPath = resolveSkillFilePath(name, configuredWorkspace);
+    const isWorkspaceSkill =
+      !!configuredWorkspace &&
+      !!skillPath &&
+      skillPath.startsWith(path.join(configuredWorkspace, "skills"));
 
     mergedByName.set(name, {
       name,
@@ -154,12 +234,25 @@ export function getSkillsForAgent(agentId: string): ResolvedSkill[] {
         ? "Workspace skill enabled in openclaw.json."
         : "Built-in OpenClaw skill enabled in openclaw.json.",
       source: isWorkspaceSkill ? "openclaw-workspace" : "openclaw-built-in",
-      filePath: isWorkspaceSkill ? workspaceSkillPath : undefined,
+      filePath: skillPath,
       disableModelInvocation: false,
     });
   }
 
-  return [...mergedByName.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return [...mergedByName.values()]
+    .map((skill) => {
+      const resolvedFilePath = resolveSkillFilePath(
+        skill.name,
+        configuredWorkspace,
+        skill.filePath,
+      );
+      return {
+        ...skill,
+        filePath: resolvedFilePath ?? skill.filePath,
+        markdown: readFileUtf8IfExists(resolvedFilePath ?? skill.filePath),
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 const TOOL_META: Record<string, { description: string; category: string }> = {

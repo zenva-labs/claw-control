@@ -10,6 +10,14 @@ import { Container } from "@/components/ui/container";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Markdown } from "@/components/ui/markdown";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -246,8 +254,10 @@ export function AgentTabs({
 
 function SkillsPanel({ skills }: { skills: ResolvedSkill[] }) {
   const [search, setSearch] = useState("");
+  const [previewSkillName, setPreviewSkillName] = useState<string | null>(null);
 
   const enabledSkills = skills.filter((s) => !s.disableModelInvocation);
+  const previewSkill = enabledSkills.find((skill) => skill.name === previewSkillName) ?? null;
   const filtered = search.trim()
     ? enabledSkills.filter((s) => s.name.toLowerCase().includes(search.trim().toLowerCase()))
     : enabledSkills;
@@ -269,7 +279,14 @@ function SkillsPanel({ skills }: { skills: ResolvedSkill[] }) {
         </Badge>
       </div>
 
-      <SkillsList skills={filtered} search={search} />
+      <SkillsList skills={filtered} search={search} onSkillSelect={setPreviewSkillName} />
+      <SkillPreviewSheet
+        skill={previewSkill}
+        open={!!previewSkill}
+        onOpenChange={(open) => {
+          if (!open) setPreviewSkillName(null);
+        }}
+      />
     </div>
   );
 }
@@ -277,9 +294,11 @@ function SkillsPanel({ skills }: { skills: ResolvedSkill[] }) {
 function SkillsList({
   skills,
   search,
+  onSkillSelect,
 }: {
   skills: ResolvedSkill[];
   search: string;
+  onSkillSelect: (skillName: string) => void;
 }) {
   if (skills.length === 0) {
     const message = search.trim()
@@ -301,29 +320,72 @@ function SkillsList({
   return (
     <div className="flex flex-col gap-2">
       {skills.map((skill) => (
-        <Card key={skill.name}>
-          <CardContent>
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 space-y-1">
-                <p className="font-mono text-sm font-medium">{skill.name}</p>
-                <p className="text-muted-foreground text-sm">{skill.description}</p>
+        <button
+          key={skill.name}
+          type="button"
+          onClick={() => onSkillSelect(skill.name)}
+          className="block w-full text-left"
+        >
+          <Card className="hover:bg-muted/40 transition-colors">
+            <CardContent>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                  <p className="font-mono text-sm font-medium">{skill.name}</p>
+                  <p className="text-muted-foreground truncate text-xs">{skill.filePath}</p>
+                  <p className="text-muted-foreground text-sm">{skill.description}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Badge
+                    variant={skill.disableModelInvocation ? "danger" : "success"}
+                    className="text-[11px]"
+                  >
+                    {skill.disableModelInvocation ? "Disabled" : "Enabled"}
+                  </Badge>
+                  <Badge variant="outline" className="text-[11px]">
+                    {skill.source}
+                  </Badge>
+                </div>
               </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <Badge
-                  variant={skill.disableModelInvocation ? "danger" : "success"}
-                  className="text-[11px]"
-                >
-                  {skill.disableModelInvocation ? "Disabled" : "Enabled"}
-                </Badge>
-                <Badge variant="outline" className="text-[11px]">
-                  {skill.source}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </button>
       ))}
     </div>
+  );
+}
+
+function SkillPreviewSheet({
+  skill,
+  open,
+  onOpenChange,
+}: {
+  skill: ResolvedSkill | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-3xl">
+        <SheetHeader className="space-y-1 border-b pr-12">
+          <SheetTitle className="font-mono text-sm">{skill?.name ?? "Skill Preview"}</SheetTitle>
+          <SheetDescription className="truncate font-mono text-xs">
+            {skill?.filePath ?? "SKILL.md file path is unavailable for this skill."}
+          </SheetDescription>
+        </SheetHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          {skill?.markdown ? (
+            <Markdown>{skill.markdown}</Markdown>
+          ) : (
+            <div className="flex min-h-[240px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-6 text-center">
+              <p className="text-sm font-medium">Preview unavailable</p>
+              <p className="text-muted-foreground text-sm">
+                Could not load a SKILL.md file for this skill.
+              </p>
+            </div>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 

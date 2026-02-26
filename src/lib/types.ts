@@ -101,6 +101,7 @@ export interface ResolvedSkill {
   description: string;
   source: string;
   filePath?: string;
+  markdown?: string;
   disableModelInvocation?: boolean;
 }
 
