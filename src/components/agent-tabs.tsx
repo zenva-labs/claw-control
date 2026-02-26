@@ -3,7 +3,6 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { NavTabs, NavTabsList, NavTabsTrigger, NavTabsContent } from "@/components/ui/nav-tabs";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SessionsTable } from "@/components/sessions-table";
 import { UsageDashboard } from "@/components/usage-dashboard";
 import { CronJobCard } from "@/components/cron-job-card";
@@ -25,6 +24,7 @@ import type { CoreFile } from "@/lib/openclaw";
 import { ClockIcon, BotIcon, SparklesIcon, WrenchIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import type { AgentConfig, CronJob, ResolvedSkill, ResolvedTool, UsageRecord } from "@/lib/types";
+import { getPlural } from "@/lib/utils";
 
 type SessionRow = {
   id: string;
@@ -245,38 +245,16 @@ export function AgentTabs({
 }
 
 function SkillsPanel({ skills }: { skills: ResolvedSkill[] }) {
-  const [filter, setFilter] = useState<"all" | "enabled" | "disabled">("all");
   const [search, setSearch] = useState("");
 
-  const enabled = skills.filter((s) => !s.disableModelInvocation);
-  const disabled = skills.filter((s) => s.disableModelInvocation);
-
-  const listForFilter = filter === "enabled" ? enabled : filter === "disabled" ? disabled : skills;
-
+  const enabledSkills = skills.filter((s) => !s.disableModelInvocation);
   const filtered = search.trim()
-    ? listForFilter.filter((s) => s.name.toLowerCase().includes(search.trim().toLowerCase()))
-    : listForFilter;
-
-  const counts = {
-    all: skills.length,
-    enabled: enabled.length,
-    disabled: disabled.length,
-  };
+    ? enabledSkills.filter((s) => s.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : enabledSkills;
 
   return (
-    <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
-      <div className="flex items-center justify-between gap-1">
-        <TabsList className="max-w-[400px]">
-          <TabsTrigger value="all" count={counts.all}>
-            All Available
-          </TabsTrigger>
-          <TabsTrigger value="enabled" count={counts.enabled}>
-            Enabled
-          </TabsTrigger>
-          <TabsTrigger value="disabled" count={counts.disabled}>
-            Disabled
-          </TabsTrigger>
-        </TabsList>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
         <div className="relative w-56">
           <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
           <Input
@@ -286,34 +264,27 @@ function SkillsPanel({ skills }: { skills: ResolvedSkill[] }) {
             className="h-8 pl-8 text-sm"
           />
         </div>
+        <Badge variant="secondary" className="text-xs tabular-nums">
+          {enabledSkills.length} {getPlural("skill", "skills", enabledSkills.length)} enabled
+        </Badge>
       </div>
 
-      {(["all", "enabled", "disabled"] as const).map((tab) => (
-        <TabsContent key={tab} value={tab} className="mt-0">
-          <SkillsList skills={filtered} emptyFilter={filter} search={search} />
-        </TabsContent>
-      ))}
-    </Tabs>
+      <SkillsList skills={filtered} search={search} />
+    </div>
   );
 }
 
 function SkillsList({
   skills,
-  emptyFilter,
   search,
 }: {
   skills: ResolvedSkill[];
-  emptyFilter: "all" | "enabled" | "disabled";
   search: string;
 }) {
   if (skills.length === 0) {
     const message = search.trim()
-      ? `No skills match "${search.trim()}".`
-      : emptyFilter === "enabled"
-        ? "No enabled skills."
-        : emptyFilter === "disabled"
-          ? "No disabled skills."
-          : "No skills have been added to this agent yet.";
+      ? `No enabled skills match "${search.trim()}".`
+      : "No enabled skills for this agent yet.";
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
         <div className="bg-muted rounded-full p-3">

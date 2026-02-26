@@ -20,6 +20,11 @@ import type {
 
 const OPENCLAW_DIR = process.env.OPENCLAW_DIR || path.join(os.homedir(), ".openclaw");
 
+function resolveHomePath(value: string): string {
+  if (value.startsWith("~/")) return path.join(os.homedir(), value.slice(2));
+  return value;
+}
+
 function getSessionContextMap(
   agentId: string,
 ): Map<string, { totalTokens: number; contextTokens: number }> {
@@ -66,33 +71,95 @@ export function getAgents(): AgentConfig[] {
 }
 
 export function getSkillsForAgent(agentId: string): ResolvedSkill[] {
+  let configuredSkillNames: string[] = [];
+  let configuredWorkspace: string | undefined;
+
+  try {
+    const configPath = path.join(OPENCLAW_DIR, "openclaw.json");
+    const config = JSON.parse(fs.readFileSync(configPath, "utf-8")) as {
+      agents?: {
+        defaults?: { workspace?: string; skills?: unknown };
+        list?: Array<{ id?: string; workspace?: string; skills?: unknown }>;
+      };
+    };
+    const agentConfig = (config.agents?.list ?? []).find((entry) => entry.id === agentId);
+    const defaultSkillsRaw = config.agents?.defaults?.skills;
+    const defaultSkills = Array.isArray(defaultSkillsRaw)
+      ? defaultSkillsRaw.filter((skill): skill is string => typeof skill === "string")
+      : [];
+    const agentSkillsRaw = agentConfig?.skills;
+    const agentSkills = Array.isArray(agentSkillsRaw)
+      ? agentSkillsRaw.filter((skill): skill is string => typeof skill === "string")
+      : [];
+    configuredSkillNames = [...new Set([...defaultSkills, ...agentSkills])];
+    const workspace = agentConfig?.workspace ?? config.agents?.defaults?.workspace;
+    configuredWorkspace = workspace ? resolveHomePath(workspace) : undefined;
+  } catch {
+    /* ignore config parse errors */
+  }
+
+  let resolvedSkills: ResolvedSkill[] = [];
+
   try {
     const sessionsPath = path.join(OPENCLAW_DIR, "agents", agentId, "sessions", "sessions.json");
-    if (!fs.existsSync(sessionsPath)) return [];
-    const data = JSON.parse(fs.readFileSync(sessionsPath, "utf-8"));
+    if (!fs.existsSync(sessionsPath)) {
+      resolvedSkills = [];
+    } else {
+      const data = JSON.parse(fs.readFileSync(sessionsPath, "utf-8")) as Record<string, unknown>;
 
-    type SkillsEntry = {
-      updatedAt?: number;
-      skillsSnapshot?: { resolvedSkills?: ResolvedSkill[] };
-    };
+      type SkillsEntry = {
+        updatedAt?: number;
+        skillsSnapshot?: { resolvedSkills?: ResolvedSkill[] };
+      };
 
-    let latest: SkillsEntry | null = null;
-    for (const entry of Object.values(data) as SkillsEntry[]) {
-      if (entry.updatedAt && (!latest || !latest.updatedAt || entry.updatedAt > latest.updatedAt)) {
-        latest = entry;
+      let latest: SkillsEntry | null = null;
+      for (const entry of Object.values(data) as SkillsEntry[]) {
+        if (entry.updatedAt && (!latest || !latest.updatedAt || entry.updatedAt > latest.updatedAt)) {
+          latest = entry;
+        }
       }
+
+      resolvedSkills = (latest?.skillsSnapshot?.resolvedSkills ?? []).map((s: ResolvedSkill) => ({
+        name: s.name,
+        description: s.description,
+        source: s.source,
+        filePath: s.filePath,
+        disableModelInvocation: s.disableModelInvocation ?? false,
+      }));
+    }
+  } catch {
+    /* ignore session parse errors */
+  }
+
+  const mergedByName = new Map<string, ResolvedSkill>();
+  for (const skill of resolvedSkills) {
+    mergedByName.set(skill.name, skill);
+  }
+
+  for (const name of configuredSkillNames) {
+    const existing = mergedByName.get(name);
+    if (existing) {
+      mergedByName.set(name, { ...existing, disableModelInvocation: false });
+      continue;
     }
 
-    return (latest?.skillsSnapshot?.resolvedSkills ?? []).map((s: ResolvedSkill) => ({
-      name: s.name,
-      description: s.description,
-      source: s.source,
-      filePath: s.filePath,
-      disableModelInvocation: s.disableModelInvocation ?? false,
-    }));
-  } catch {
-    return [];
+    const workspaceSkillPath = configuredWorkspace
+      ? path.join(configuredWorkspace, "skills", name, "SKILL.md")
+      : undefined;
+    const isWorkspaceSkill = workspaceSkillPath ? fs.existsSync(workspaceSkillPath) : false;
+
+    mergedByName.set(name, {
+      name,
+      description: isWorkspaceSkill
+        ? "Workspace skill enabled in openclaw.json."
+        : "Built-in OpenClaw skill enabled in openclaw.json.",
+      source: isWorkspaceSkill ? "openclaw-workspace" : "openclaw-built-in",
+      filePath: isWorkspaceSkill ? workspaceSkillPath : undefined,
+      disableModelInvocation: false,
+    });
   }
+
+  return [...mergedByName.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 const TOOL_META: Record<string, { description: string; category: string }> = {
