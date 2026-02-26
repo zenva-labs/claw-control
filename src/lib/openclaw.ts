@@ -570,13 +570,22 @@ export function getGatewayInfo(): GatewayInfo {
     if (fs.existsSync(logPath)) {
       const content = fs.readFileSync(logPath, "utf-8");
       const lines = content.split("\n");
+      let latestGatewayStartAt: string | null = null;
+      let latestHeartbeatStartAt: string | null = null;
+
       for (const line of lines) {
-        if (!startedAt) {
-          const ts = line.match(/^(\d{4}-\d{2}-\d{2}T[\d:.]+Z)/);
-          if (ts) startedAt = ts[1];
+        const ts = line.match(/^(\d{4}-\d{2}-\d{2}T[\d:.]+Z)/)?.[1] ?? null;
+
+        if (line.includes("[heartbeat] started") && ts) {
+          latestHeartbeatStartAt = ts;
         }
-        const pidMatch = line.match(/PID (\d+)/);
-        if (pidMatch) pid = parseInt(pidMatch[1], 10);
+
+        if (line.includes("[gateway] listening on") && ts) {
+          latestGatewayStartAt = ts;
+          const pidMatch = line.match(/PID (\d+)/);
+          if (pidMatch) pid = parseInt(pidMatch[1], 10);
+        }
+
         const hmMatch = line.match(/health-monitor.*interval: (\d+)s, grace: (\d+)s/);
         if (hmMatch)
           healthMonitor = {
@@ -584,6 +593,8 @@ export function getGatewayInfo(): GatewayInfo {
             grace: parseInt(hmMatch[2], 10),
           };
       }
+
+      startedAt = latestGatewayStartAt ?? latestHeartbeatStartAt;
     }
   } catch {
     /* ignore */
