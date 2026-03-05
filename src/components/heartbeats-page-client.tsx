@@ -50,51 +50,69 @@ export function HeartbeatsPageClient({
         </div>
       </div>
 
-      {/* Summary cards */}
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard
-          icon={<HeartPulseIcon className="size-4" />}
-          label="Enabled Agents"
-          value={`${enabledAgents.length} / ${status.agents.length}`}
-          sub={`${status.agents.length - enabledAgents.length} disabled`}
-        />
-        <SummaryCard
-          icon={<TimerIcon className="size-4" />}
-          label="Default Interval"
-          value={enabledAgents.find((a) => a.agentId === status.defaultAgentId)?.every ?? "—"}
-          sub={`Default agent: ${status.defaultAgentId}`}
-        />
-        <SummaryCard
-          icon={<ClockIcon className="size-4" />}
-          label="Last Heartbeat"
-          value={
-            status.lastHeartbeatAt
-              ? formatDistanceToNow(new Date(status.lastHeartbeatAt), {
-                  addSuffix: true,
-                })
-              : "Never"
-          }
-          sub={status.lastHeartbeatAt ? format(new Date(status.lastHeartbeatAt), "h:mm a") : ""}
-        />
-        <SummaryCard
-          icon={<ServerIcon className="size-4" />}
-          label="Recent Events"
-          value={String(status.recentHeartbeatEvents.length)}
-          sub="Heartbeat log entries"
-        />
-      </div>
+      {status.agents.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
+          <div className="bg-muted rounded-full p-3">
+            <HeartPulseIcon className="text-muted-foreground size-6" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">No heartbeat configuration</p>
+            <p className="text-muted-foreground mt-0.5 text-sm">
+              Configure heartbeat settings in openclaw.json to populate this page.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Summary cards */}
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <SummaryCard
+              icon={<HeartPulseIcon className="size-4" />}
+              label="Enabled Agents"
+              value={`${enabledAgents.length} / ${status.agents.length}`}
+              sub={`${status.agents.length - enabledAgents.length} disabled`}
+            />
+            <SummaryCard
+              icon={<TimerIcon className="size-4" />}
+              label="Default Interval"
+              value={enabledAgents.find((a) => a.agentId === status.defaultAgentId)?.every ?? "—"}
+              sub={`Default agent: ${status.defaultAgentId}`}
+            />
+            <SummaryCard
+              icon={<ClockIcon className="size-4" />}
+              label="Last Heartbeat"
+              value={
+                status.lastHeartbeatAt
+                  ? formatDistanceToNow(new Date(status.lastHeartbeatAt), {
+                      addSuffix: true,
+                    })
+                  : "Never"
+              }
+              sub={status.lastHeartbeatAt ? format(new Date(status.lastHeartbeatAt), "h:mm a") : ""}
+            />
+            <SummaryCard
+              icon={<ServerIcon className="size-4" />}
+              label="Recent Events"
+              value={String(status.recentHeartbeatEvents.length)}
+              sub="Heartbeat log entries"
+            />
+          </div>
 
-      {/* Agent heartbeat cards */}
-      <h2 className="mb-2 text-lg font-semibold">Agents</h2>
-      <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {status.agents.map((agent) => {
-          const hbFile = status.heartbeatFilePaths.find((f) => f.agentId === agent.agentId);
-          return <AgentHeartbeatCard key={agent.agentId} agent={agent} heartbeatFile={hbFile} />;
-        })}
-      </div>
+          {/* Agent heartbeat cards */}
+          <h2 className="mb-2 text-lg font-semibold">Agents</h2>
+          <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {status.agents.map((agent) => {
+              const hbFile = status.heartbeatFilePaths.find((f) => f.agentId === agent.agentId);
+              return (
+                <AgentHeartbeatCard key={agent.agentId} agent={agent} heartbeatFile={hbFile} />
+              );
+            })}
+          </div>
 
-      {/* Recent heartbeat events */}
-      <RecentEventsSection events={status.recentHeartbeatEvents} />
+          {/* Recent heartbeat events */}
+          <RecentEventsSection events={status.recentHeartbeatEvents} />
+        </>
+      )}
     </Container>
   );
 }

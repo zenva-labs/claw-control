@@ -1,4 +1,5 @@
 import { format, formatDistanceToNow } from "date-fns";
+import { CableIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,12 +26,17 @@ export function ChannelsPageContent({
       </div>
 
       {status.channels.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-14 text-center">
-          <p className="text-sm font-medium">No channels configured</p>
-          <p className="text-muted-foreground text-sm">
-            Add entries under <span className="font-mono text-xs">channels</span> in
-            <span className="font-mono text-xs"> openclaw.json</span> to populate this page.
-          </p>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
+          <div className="bg-muted rounded-full p-3">
+            <CableIcon className="text-muted-foreground size-6" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">No channels configured</p>
+            <p className="text-muted-foreground mt-0.5 text-sm">
+              Add entries under <span className="font-mono text-xs">channels</span> in
+              <span className="font-mono text-xs"> openclaw.json</span> to populate this page.
+            </p>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">

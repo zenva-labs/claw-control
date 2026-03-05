@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MessageSquareMoreIcon } from "lucide-react";
 import { getAgents, getAllSessions } from "@/lib/openclaw";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { SessionsTable } from "@/components/sessions-table";
@@ -68,7 +69,17 @@ export default function AllSessionsPage() {
       </div>
 
       {sessions.length === 0 ? (
-        <p className="text-muted-foreground py-8 text-center text-sm">No sessions found.</p>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed py-16 text-center">
+          <div className="bg-muted rounded-full p-3">
+            <MessageSquareMoreIcon className="text-muted-foreground size-6" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">No sessions found</p>
+            <p className="text-muted-foreground mt-0.5 text-sm">
+              Sessions will appear here once agents start conversations.
+            </p>
+          </div>
+        </div>
       ) : (
         <SessionsTable sessions={rows} />
       )}
