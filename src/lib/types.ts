@@ -199,3 +199,31 @@ export interface UsageRecord {
   cachedTokens: number;
   cost: number;
 }
+
+export interface ChannelFileInfo {
+  name: string;
+  path: string;
+  sizeBytes: number;
+  modifiedAt: string;
+}
+
+export interface ChannelInfo {
+  id: string;
+  enabled: boolean | null;
+  dmPolicy: string | null;
+  groupRuleCount: number;
+  config: Record<string, unknown>;
+  sessionCount: number;
+  lastSeenAt: string | null;
+  accountIds: string[];
+  agentIds: string[];
+  stateDirPath: string;
+  stateDirExists: boolean;
+  stateFiles: ChannelFileInfo[];
+  credentialFiles: ChannelFileInfo[];
+}
+
+export interface ChannelsStatus {
+  openclawDir: string;
+  channels: ChannelInfo[];
+}

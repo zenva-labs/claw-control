@@ -5,6 +5,9 @@ import type {
   AgentConfig,
   CronJob,
   CronRun,
+  ChannelsStatus,
+  ChannelFileInfo,
+  ChannelInfo,
   GatewayInfo,
   HeartbeatStatus,
   HeartbeatLogEntry,
@@ -19,6 +22,17 @@ import type {
 } from "./types";
 
 const OPENCLAW_DIR = process.env.OPENCLAW_DIR || path.join(os.homedir(), ".openclaw");
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getStringValue(record: Record<string, unknown>, key: string): string | null {
+  const value = record[key];
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
 
 function resolveHomePath(value: string): string {
   if (value.startsWith("~/")) return path.join(os.homedir(), value.slice(2));
@@ -814,6 +828,235 @@ export function getPairedDevices(): PairedDevice[] {
   } catch {
     return [];
   }
+}
+
+function isExistingDirectory(directoryPath: string): boolean {
+  try {
+    return fs.existsSync(directoryPath) && fs.statSync(directoryPath).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+function toTimestampMs(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Date.parse(value);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  return null;
+}
+
+function getFileInfos(
+  directoryPath: string,
+  options?: { filter?: (fileName: string) => boolean },
+): ChannelFileInfo[] {
+  if (!isExistingDirectory(directoryPath)) return [];
+
+  const rows: (ChannelFileInfo & { modifiedAtMs: number })[] = [];
+  const fileNames = fs.readdirSync(directoryPath);
+  for (const fileName of fileNames) {
+    if (options?.filter && !options.filter(fileName)) continue;
+    const filePath = path.join(directoryPath, fileName);
+    try {
+      const stat = fs.statSync(filePath);
+      if (!stat.isFile()) continue;
+      rows.push({
+        name: fileName,
+        path: filePath,
+        sizeBytes: stat.size,
+        modifiedAt: stat.mtime.toISOString(),
+        modifiedAtMs: stat.mtime.getTime(),
+      });
+    } catch {
+      /* ignore unreadable files */
+    }
+  }
+
+  return rows
+    .sort((a, b) => b.modifiedAtMs - a.modifiedAtMs)
+    .map(({ modifiedAtMs: _modifiedAtMs, ...fileInfo }) => fileInfo);
+}
+
+function inferAccountIdFromStateFile(fileName: string): string | null {
+  if (fileName.startsWith("update-offset-") && fileName.endsWith(".json")) {
+    const accountId = fileName.slice("update-offset-".length, -".json".length);
+    return accountId || null;
+  }
+
+  if (fileName.startsWith("command-hash-")) {
+    const remainder = fileName.slice("command-hash-".length);
+    const separatorIndex = remainder.indexOf("-");
+    if (separatorIndex > 0) return remainder.slice(0, separatorIndex);
+  }
+
+  return null;
+}
+
+function inferAccountIdFromCredentialFile(channelId: string, fileName: string): string | null {
+  const prefix = `${channelId}-`;
+  const suffix = "-allowFrom.json";
+  if (!fileName.startsWith(prefix) || !fileName.endsWith(suffix)) return null;
+  const accountId = fileName.slice(prefix.length, fileName.length - suffix.length);
+  return accountId || null;
+}
+
+function getConfiguredAgentIds(config: Record<string, unknown>): string[] {
+  const agentsConfig = isRecord(config.agents) ? config.agents : null;
+  if (!agentsConfig) return [];
+
+  const list = agentsConfig.list;
+  if (!Array.isArray(list)) return [];
+
+  const ids = new Set<string>();
+  for (const entry of list) {
+    if (!isRecord(entry)) continue;
+    const id = getStringValue(entry, "id");
+    if (id) ids.add(id);
+  }
+
+  return [...ids];
+}
+
+function getSessionChannel(entry: Record<string, unknown>): string | null {
+  const deliveryContext = isRecord(entry.deliveryContext) ? entry.deliveryContext : null;
+  const origin = isRecord(entry.origin) ? entry.origin : null;
+
+  return (
+    getStringValue(entry, "lastChannel") ??
+    (deliveryContext ? getStringValue(deliveryContext, "channel") : null) ??
+    (origin ? getStringValue(origin, "surface") : null) ??
+    (origin ? getStringValue(origin, "provider") : null)
+  );
+}
+
+function getSessionAccountIds(entry: Record<string, unknown>): string[] {
+  const ids = new Set<string>();
+  const deliveryContext = isRecord(entry.deliveryContext) ? entry.deliveryContext : null;
+  const origin = isRecord(entry.origin) ? entry.origin : null;
+
+  const fromDeliveryContext = deliveryContext ? getStringValue(deliveryContext, "accountId") : null;
+  if (fromDeliveryContext) ids.add(fromDeliveryContext);
+
+  const fromOrigin = origin ? getStringValue(origin, "accountId") : null;
+  if (fromOrigin) ids.add(fromOrigin);
+
+  return [...ids];
+}
+
+type ChannelActivity = {
+  sessionCount: number;
+  lastSeenAtMs: number | null;
+  accountIds: Set<string>;
+  agentIds: Set<string>;
+};
+
+function getChannelActivity(agentIds: string[]): Map<string, ChannelActivity> {
+  const activityByChannel = new Map<string, ChannelActivity>();
+
+  for (const agentId of agentIds) {
+    const sessionsPath = path.join(OPENCLAW_DIR, "agents", agentId, "sessions", "sessions.json");
+    if (!fs.existsSync(sessionsPath)) continue;
+
+    try {
+      const parsed = JSON.parse(fs.readFileSync(sessionsPath, "utf-8")) as unknown;
+      if (!isRecord(parsed)) continue;
+
+      for (const rawEntry of Object.values(parsed)) {
+        if (!isRecord(rawEntry)) continue;
+
+        const channel = getSessionChannel(rawEntry);
+        if (!channel) continue;
+
+        let aggregate = activityByChannel.get(channel);
+        if (!aggregate) {
+          aggregate = {
+            sessionCount: 0,
+            lastSeenAtMs: null,
+            accountIds: new Set<string>(),
+            agentIds: new Set<string>(),
+          };
+          activityByChannel.set(channel, aggregate);
+        }
+
+        aggregate.sessionCount += 1;
+        aggregate.agentIds.add(agentId);
+
+        const updatedAtMs = toTimestampMs(rawEntry.updatedAt);
+        if (updatedAtMs && (!aggregate.lastSeenAtMs || updatedAtMs > aggregate.lastSeenAtMs)) {
+          aggregate.lastSeenAtMs = updatedAtMs;
+        }
+
+        for (const accountId of getSessionAccountIds(rawEntry)) {
+          aggregate.accountIds.add(accountId);
+        }
+      }
+    } catch {
+      /* ignore unreadable session state */
+    }
+  }
+
+  return activityByChannel;
+}
+
+export function getChannelsStatus(): ChannelsStatus {
+  const configPath = path.join(OPENCLAW_DIR, "openclaw.json");
+  const parsedConfig = JSON.parse(fs.readFileSync(configPath, "utf-8")) as unknown;
+  const config = isRecord(parsedConfig) ? parsedConfig : {};
+  const channelsRecord = isRecord(config.channels) ? config.channels : {};
+
+  const configuredAgentIds = getConfiguredAgentIds(config);
+  const activityByChannel = getChannelActivity(configuredAgentIds);
+  const credentialsDir = path.join(OPENCLAW_DIR, "credentials");
+
+  const channels: ChannelInfo[] = Object.entries(channelsRecord)
+    .map(([id, channelConfigRaw]) => {
+      const channelConfig = isRecord(channelConfigRaw) ? channelConfigRaw : {};
+      const enabled = typeof channelConfig.enabled === "boolean" ? channelConfig.enabled : null;
+      const dmPolicy = getStringValue(channelConfig, "dmPolicy");
+      const groups = isRecord(channelConfig.groups) ? channelConfig.groups : null;
+      const groupRuleCount = groups ? Object.keys(groups).length : 0;
+
+      const stateDirPath = path.join(OPENCLAW_DIR, id);
+      const stateDirExists = isExistingDirectory(stateDirPath);
+      const stateFiles = getFileInfos(stateDirPath);
+      const credentialFiles = getFileInfos(credentialsDir, {
+        filter: (fileName) => fileName === `${id}.json` || fileName.startsWith(`${id}-`),
+      });
+
+      const activity = activityByChannel.get(id);
+      const accountIds = new Set<string>(activity ? [...activity.accountIds] : []);
+      for (const file of stateFiles) {
+        const inferredAccountId = inferAccountIdFromStateFile(file.name);
+        if (inferredAccountId) accountIds.add(inferredAccountId);
+      }
+      for (const file of credentialFiles) {
+        const inferredAccountId = inferAccountIdFromCredentialFile(id, file.name);
+        if (inferredAccountId) accountIds.add(inferredAccountId);
+      }
+
+      return {
+        id,
+        enabled,
+        dmPolicy,
+        groupRuleCount,
+        config: channelConfig,
+        sessionCount: activity?.sessionCount ?? 0,
+        lastSeenAt: activity?.lastSeenAtMs ? new Date(activity.lastSeenAtMs).toISOString() : null,
+        accountIds: [...accountIds].sort((a, b) => a.localeCompare(b)),
+        agentIds: activity ? [...activity.agentIds].sort((a, b) => a.localeCompare(b)) : [],
+        stateDirPath,
+        stateDirExists,
+        stateFiles,
+        credentialFiles,
+      };
+    })
+    .sort((a, b) => a.id.localeCompare(b.id));
+
+  return {
+    openclawDir: OPENCLAW_DIR,
+    channels,
+  };
 }
 
 export function getActiveSessions(): (SessionSummary & {
