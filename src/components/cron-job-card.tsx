@@ -84,7 +84,7 @@ export function CronJobCard({ job, agent }: { job: CronJob; agent?: AgentConfig 
               <span>
                 <span className="text-muted-foreground mr-1">{job.schedule.kind}</span>
                 {job.schedule.at && format(new Date(job.schedule.at), "MMM d, yyyy, h:mm a")}
-                {job.schedule.cron && job.schedule.cron}
+                {job.schedule.cron}
               </span>
             }
           />

@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 const LOGS_DIR = "/tmp/openclaw";
 
+/* oxlint-disable-next-line no-control-regex */
 const ANSI_RE = /\u001b\[[0-9;]*m/g;
 
 function getLatestLogFile(): string | null {
