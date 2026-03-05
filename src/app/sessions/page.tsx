@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAgents, getAllSessions } from "@/lib/openclaw";
+import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { SessionsTable } from "@/components/sessions-table";
 import { Container } from "@/components/ui/container";
 import { PageBreadcrumb } from "@/components/page-breadcrumb";
@@ -9,8 +10,14 @@ export const metadata: Metadata = { title: "Sessions | Claw Control" };
 export const dynamic = "force-dynamic";
 
 export default function AllSessionsPage() {
-  const agents = getAgents();
-  const sessions = getAllSessions();
+  const agents = loadOrRedirectOnError(() => getAgents(), {
+    context: "loading agent configuration",
+    retryPath: "/sessions",
+  });
+  const sessions = loadOrRedirectOnError(() => getAllSessions(), {
+    context: "loading sessions across all agents",
+    retryPath: "/sessions",
+  });
   const activeCount = sessions.filter((s) => s.status === "active").length;
 
   const rows = sessions.map((s) => ({

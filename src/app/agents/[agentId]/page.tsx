@@ -9,6 +9,7 @@ import {
   getToolsForAgent,
   getCoreFilesForAgent,
 } from "@/lib/openclaw";
+import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { AgentTabs } from "@/components/agent-tabs";
 
 export const metadata: Metadata = { title: "Agent | Claw Control" };
@@ -35,13 +36,25 @@ export default async function AgentPage({
   const { agentId } = await params;
   const { tab } = await searchParams;
   const activeTab: AgentTab = VALID_TABS.includes(tab as AgentTab) ? (tab as AgentTab) : "usage";
-  const agents = getAgents();
+  const agents = loadOrRedirectOnError(() => getAgents(), {
+    context: "loading agent configuration",
+    retryPath: `/agents/${agentId}`,
+  });
   const agent = agents.find((a) => a.id === agentId);
   if (!agent) notFound();
 
-  const sessions = getSessionsForAgent(agentId);
-  const allUsage = getUsageData();
-  const allCronJobs = getCronJobs();
+  const sessions = loadOrRedirectOnError(() => getSessionsForAgent(agentId), {
+    context: `loading sessions for agent '${agentId}'`,
+    retryPath: `/agents/${agentId}`,
+  });
+  const allUsage = loadOrRedirectOnError(() => getUsageData(), {
+    context: `loading usage data for agent '${agentId}'`,
+    retryPath: `/agents/${agentId}`,
+  });
+  const allCronJobs = loadOrRedirectOnError(() => getCronJobs(), {
+    context: `loading cron jobs for agent '${agentId}'`,
+    retryPath: `/agents/${agentId}`,
+  });
 
   const sessionRows = sessions.map((s) => ({
     id: s.id,
@@ -62,9 +75,18 @@ export default async function AgentPage({
 
   const usageRecords = allUsage.filter((r) => r.agentId === agentId);
   const cronJobs = allCronJobs.filter((j) => j.sessionTarget === agentId);
-  const skills = getSkillsForAgent(agentId);
-  const tools = getToolsForAgent(agentId);
-  const coreFiles = getCoreFilesForAgent(agent.workspace);
+  const skills = loadOrRedirectOnError(() => getSkillsForAgent(agentId), {
+    context: `loading skills for agent '${agentId}'`,
+    retryPath: `/agents/${agentId}`,
+  });
+  const tools = loadOrRedirectOnError(() => getToolsForAgent(agentId), {
+    context: `loading tools for agent '${agentId}'`,
+    retryPath: `/agents/${agentId}`,
+  });
+  const coreFiles = loadOrRedirectOnError(() => getCoreFilesForAgent(agent.workspace), {
+    context: `loading core files for agent '${agentId}'`,
+    retryPath: `/agents/${agentId}`,
+  });
 
   return (
     <AgentTabs

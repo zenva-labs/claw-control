@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getUsageData } from "@/lib/openclaw";
+import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { UsageDashboard } from "@/components/usage-dashboard";
 import { Container } from "@/components/ui/container";
 import { PageBreadcrumb } from "@/components/page-breadcrumb";
@@ -9,7 +10,10 @@ export const metadata: Metadata = { title: "Usage | Claw Control" };
 export const dynamic = "force-dynamic";
 
 export default function UsagePage() {
-  const records = getUsageData();
+  const records = loadOrRedirectOnError(() => getUsageData(), {
+    context: "loading usage metrics",
+    retryPath: "/usage",
+  });
 
   return (
     <Container>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAgents, getAgentSessionCounts } from "@/lib/openclaw";
+import { loadOrRedirectOnError } from "@/lib/server-page-error";
 
 export const dynamic = "force-dynamic";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -12,8 +13,14 @@ import { PageBreadcrumb } from "@/components/page-breadcrumb";
 export const metadata: Metadata = { title: "Agents | Claw Control" };
 
 export default function DashboardPage() {
-  const agents = getAgents();
-  const counts = getAgentSessionCounts();
+  const agents = loadOrRedirectOnError(() => getAgents(), {
+    context: "loading agent configuration",
+    retryPath: "/",
+  });
+  const counts = loadOrRedirectOnError(() => getAgentSessionCounts(), {
+    context: "loading session counts for agents",
+    retryPath: "/",
+  });
 
   return (
     <Container>

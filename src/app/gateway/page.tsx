@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getGatewayInfo, getPairedDevices, getActiveSessions } from "@/lib/openclaw";
+import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { GatewayPageTabs } from "@/components/gateway-page-tabs";
 
 export const metadata: Metadata = { title: "Gateway | Claw Control" };
@@ -18,9 +19,18 @@ export default async function GatewayPage({
     ? (tab as GatewayTab)
     : "overview";
 
-  const info = getGatewayInfo();
-  const devices = getPairedDevices();
-  const sessions = getActiveSessions();
+  const info = loadOrRedirectOnError(() => getGatewayInfo(), {
+    context: "loading gateway configuration",
+    retryPath: "/gateway",
+  });
+  const devices = loadOrRedirectOnError(() => getPairedDevices(), {
+    context: "loading paired device list",
+    retryPath: "/gateway",
+  });
+  const sessions = loadOrRedirectOnError(() => getActiveSessions(), {
+    context: "loading active gateway sessions",
+    retryPath: "/gateway",
+  });
 
   return (
     <GatewayPageTabs info={info} devices={devices} sessions={sessions} activeTab={activeTab} />
