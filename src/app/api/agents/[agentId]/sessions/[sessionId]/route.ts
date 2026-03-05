@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/openclaw";
+import { getSession } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 

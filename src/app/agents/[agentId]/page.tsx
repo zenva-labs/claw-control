@@ -8,7 +8,7 @@ import {
   getSkillsForAgent,
   getToolsForAgent,
   getCoreFilesForAgent,
-} from "@/lib/openclaw";
+} from "@/lib/data";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { AgentTabs } from "@/components/agent-tabs";
 

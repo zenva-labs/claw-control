@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getUsageData } from "@/lib/openclaw";
+import { getUsageData } from "@/lib/data";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { UsageDashboard } from "@/components/usage-dashboard";
 import { Container } from "@/components/ui/container";

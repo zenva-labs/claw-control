@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:demo": "CLAW_CONTROL_DEMO=1 next dev",
     "typecheck": "tsc --noEmit",
     "build": "next build",
     "start": "next start",

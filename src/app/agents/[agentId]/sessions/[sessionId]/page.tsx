@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAgents, getSession } from "@/lib/openclaw";
+import { getAgents, getSession } from "@/lib/data";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { SessionDetails } from "@/components/session-details";
 

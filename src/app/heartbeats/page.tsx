@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getHeartbeatStatus } from "@/lib/openclaw";
+import { getHeartbeatStatus } from "@/lib/data";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { HeartbeatsPageClient } from "@/components/heartbeats-page-client";
 import { PageBreadcrumb } from "@/components/page-breadcrumb";

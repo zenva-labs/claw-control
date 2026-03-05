@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SetBreadcrumbs } from "@/components/breadcrumb-provider";
 import { CoreFilesTab } from "@/components/core-files-tab";
-import type { CoreFile } from "@/lib/openclaw";
+import type { CoreFile } from "@/lib/data";
 import { ClockIcon, BotIcon, SparklesIcon, WrenchIcon, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import type { AgentConfig, CronJob, ResolvedSkill, ResolvedTool, UsageRecord } from "@/lib/types";

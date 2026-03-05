@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getCronJobs, getCronRuns, getAgents } from "@/lib/openclaw";
+import { getCronJobs, getCronRuns, getAgents } from "@/lib/data";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { CronPageTabs } from "@/components/cron-page-tabs";
 import { PageBreadcrumb } from "@/components/page-breadcrumb";

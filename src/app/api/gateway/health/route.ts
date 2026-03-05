@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
-import { getGatewayInfo } from "@/lib/openclaw";
+import { getGatewayInfo } from "@/lib/data";
+import { isDemoMode } from "@/lib/demo/mode";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const info = getGatewayInfo();
+
+  if (isDemoMode()) {
+    return NextResponse.json({ status: "online", port: info.port, httpStatus: 200 });
+  }
+
   const url = `http://localhost:${info.port}/`;
 
   try {

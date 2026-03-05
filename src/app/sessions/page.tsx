@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { MessageSquareMoreIcon } from "lucide-react";
-import { getAgents, getAllSessions } from "@/lib/openclaw";
+import { getAgents, getAllSessions } from "@/lib/data";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { SessionsTable } from "@/components/sessions-table";
 import { Container } from "@/components/ui/container";

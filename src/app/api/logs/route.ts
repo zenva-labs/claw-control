@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { NextRequest } from "next/server";
+import { getDemoLogEntries, getDemoLogSourceLabel } from "@/lib/data";
+import { isDemoMode } from "@/lib/demo/mode";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,16 @@ interface ParsedLogEntry {
   level: string;
   component: string;
   message: string;
+}
+
+function createSseResponse(stream: ReadableStream): Response {
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+    },
+  });
 }
 
 function parseLine(raw: string): ParsedLogEntry | null {
@@ -99,6 +111,60 @@ function readTailEntries(
 }
 
 export async function GET(request: NextRequest) {
+  if (isDemoMode()) {
+    const encoder = new TextEncoder();
+    const seededEntries = getDemoLogEntries();
+    const sourceLabel = getDemoLogSourceLabel();
+
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(`event: meta\ndata: ${JSON.stringify({ file: sourceLabel })}\n\n`),
+        );
+
+        if (seededEntries.length > 0) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(seededEntries)}\n\n`));
+        }
+
+        let closed = false;
+        let cursor = 0;
+
+        const pushLiveLine = () => {
+          if (closed || seededEntries.length === 0) return;
+
+          const entry = seededEntries[cursor % seededEntries.length];
+          cursor += 1;
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify([{ ...entry, time: new Date().toISOString() }])}\n\n`,
+            ),
+          );
+        };
+
+        const updates = setInterval(pushLiveLine, 6000);
+        const heartbeat = setInterval(() => {
+          if (closed) return;
+          try {
+            controller.enqueue(encoder.encode(": heartbeat\n\n"));
+          } catch {
+            cleanup();
+          }
+        }, 15000);
+
+        const cleanup = () => {
+          if (closed) return;
+          closed = true;
+          clearInterval(updates);
+          clearInterval(heartbeat);
+        };
+
+        request.signal.addEventListener("abort", cleanup);
+      },
+    });
+
+    return createSseResponse(stream);
+  }
+
   const logFile = getLatestLogFile();
 
   const encoder = new TextEncoder();
@@ -205,11 +271,5 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-    },
-  });
+  return createSseResponse(stream);
 }

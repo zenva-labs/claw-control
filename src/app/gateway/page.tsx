@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getGatewayInfo, getPairedDevices, getActiveSessions } from "@/lib/openclaw";
+import { getGatewayInfo, getPairedDevices, getActiveSessions } from "@/lib/data";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 import { GatewayPageTabs } from "@/components/gateway-page-tabs";
 

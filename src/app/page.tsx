@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SparklesIcon } from "lucide-react";
-import { getAgents, getAgentSessionCounts } from "@/lib/openclaw";
+import { getAgents, getAgentSessionCounts } from "@/lib/data";
 import { loadOrRedirectOnError } from "@/lib/server-page-error";
 
 export const dynamic = "force-dynamic";
