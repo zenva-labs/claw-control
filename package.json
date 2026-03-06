@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "author": "martin.didiego@zenvalabs.com",
   "private": true,
+  "packageManager": "pnpm@10.26.0",
   "scripts": {
     "dev": "next dev",
     "dev:demo": "CLAW_CONTROL_DEMO=1 next dev",
