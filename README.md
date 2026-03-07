@@ -18,7 +18,7 @@ Follow these steps to setup Claw Control:
 Make sure you clone the repository onto the machine that has OpenClaw running or has OpenClaw data available locally.
 
 ```bash
-git clone https://github.com/zenvalabs/claw-control.git
+git clone https://github.com/zenva-labs/claw-control.git
 ```
 
 ### 2. Install dependencies
