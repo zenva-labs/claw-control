@@ -1,11 +1,61 @@
 # Claw Control
 
-Claw Control is a dashboard for your [OpenClaw](https://github.com/zenvalabs/openclaw) agents.
+Claw Control is a plug-and-play dashboard for monitoring a local [OpenClaw](https://github.com/zenvalabs/openclaw) instance.
 
-## How To Use
+![Claw Control](./docs/screenshot.png)
 
-## Troubleshooting
+## System Requirements
 
-## Customization
+- [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/)
+- A machine that already has OpenClaw running or has OpenClaw data available locally
 
-## License
+## Setup Steps
+
+Follow these steps to setup Claw Control:
+
+### 1. Clone the repository
+
+Make sure you clone the repository onto the machine that has OpenClaw running or has OpenClaw data available locally.
+
+```bash
+git clone https://github.com/zenvalabs/claw-control.git
+```
+
+### 2. Install dependencies
+
+```bash
+cd claw-control
+npm install
+```
+
+### 3. Point the application to your OpenClaw data
+
+By default, Claw Control will look for your OpenClaw data in `~/.openclaw` which is OpenClaw's default data location. If your OpenClaw data is not in this location, follow the instructions in the [Environment Variables & Configuration](#environment-variables--configuration) section to set `OPENCLAW_DIR` to the full path to your OpenClaw data.
+
+### 4. Build and run Claw Control
+
+```bash
+npm run build
+npm start
+```
+
+## Environment Variables & Configuration
+
+Once you've installed dependencies and pointed the application to your OpenClaw data, you can build and run Claw Control. If you need to configure the application, you'll need to create a `.env` file from the sample environment file:
+
+```bash
+cp .env.sample .env
+```
+
+Then, you can set the following environment variables:
+
+- `OPENCLAW_DIR`: Full path to your OpenClaw directory.
+
+## Local Development
+
+For local development, you can run the following commands after setting up your environment:
+
+```bash
+npm install
+npm run dev
+```
