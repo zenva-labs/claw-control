@@ -51,6 +51,14 @@ Then, you can set the following environment variables:
 
 - `OPENCLAW_DIR`: Full path to your OpenClaw directory.
 
+## Security
+
+Claw Control does not provide authentication or authorization out of the box. Securing access to Claw Control is the responsibility of the individual running it.
+
+Depending on how you deploy it, Claw Control may be accessible to other people on the same network. You should restrict access appropriately for your environment, such as by limiting network exposure and placing it behind your own access controls.
+
+It is also highly recommended that you run regular security audits on your OpenClaw instance. See the [OpenClaw security documentation](https://docs.openclaw.ai/cli/security#security) for guidance.
+
 ## Local Development
 
 For local development, you can run the following commands after setting up your environment:
