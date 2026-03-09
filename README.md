@@ -2,7 +2,7 @@
 
 Claw Control is a plug-and-play dashboard for monitoring a local [OpenClaw](https://github.com/zenvalabs/openclaw) instance.
 
-![Claw Control](./docs/screenshot.jpeg)
+![Claw Control screenshot](./docs/usage-screenshot.jpeg)
 
 ## System Requirements
 
